@@ -62,7 +62,7 @@ function GuideManagement() {
               <td>
                 <button
                   className="view-btn"
-                  onClick={() => navigate(`/patient/${item.aptId}`)}
+                  onClick={() => navigate(`/ai-guide/${item.aptId}`)}
                 >
                   자세히
                 </button>

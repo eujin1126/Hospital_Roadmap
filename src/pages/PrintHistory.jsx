@@ -41,7 +41,7 @@ function PrintHistory() {
             <div className="print-card-right">
               <button
                 className="detail-link"
-                onClick={() => navigate(`/patient/APT-00${idx + 2}`)}
+                onClick={() => navigate(`/ai-guide/APT-00${idx + 2}`)}
               >
                 안내문 생성
               </button>
