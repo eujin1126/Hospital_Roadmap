@@ -7,7 +7,7 @@ function PatientList() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('등록번호순');
   const navigate = useNavigate();
-  const { patients, todayAppointments, isLoading } = useData();
+  const { patients, allAppointments, isLoading } = useData();
 
   const filteredPatients = patients.filter(p =>
     p.name.includes(searchTerm) ||
@@ -19,8 +19,8 @@ function PatientList() {
 
   // 환자 ID로 해당 aptId 찾기
   const getAptId = (patientId) => {
-    const apt = todayAppointments.find(a => a.patientId === patientId);
-    return apt ? apt.aptId : `APT-001`;
+    const apt = allAppointments.find(a => a.patientId === patientId);
+    return apt ? apt.aptId : null;
   };
 
   if (isLoading) return <div className="patient-list-page"><p>데이터 로딩 중...</p></div>;
@@ -79,7 +79,10 @@ function PatientList() {
               <td>
                 <button
                   className="detail-btn"
-                  onClick={() => navigate(`/patient/${getAptId(patient.id)}`)}
+                  onClick={() => {
+                    const aptId = getAptId(patient.id);
+                    if (aptId) navigate(`/patient/${aptId}`);
+                  }}
                 >
                   상세
                 </button>
