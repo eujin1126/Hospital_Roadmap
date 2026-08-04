@@ -3,6 +3,25 @@ import { fetchPatientData, transformPatientData } from '../services/s3DataServic
 
 const DataContext = createContext(null);
 
+// localStorage에서 안내문 생성 상태 불러오기
+function loadGuideStatus() {
+  try {
+    const stored = localStorage.getItem('guideStatus');
+    return stored ? JSON.parse(stored) : {};
+  } catch {
+    return {};
+  }
+}
+
+// localStorage에 안내문 생성 상태 저장
+function saveGuideStatus(status) {
+  try {
+    localStorage.setItem('guideStatus', JSON.stringify(status));
+  } catch (e) {
+    console.error('guideStatus 저장 실패:', e);
+  }
+}
+
 export function DataProvider({ children }) {
   const [data, setData] = useState({
     patients: [],
@@ -14,6 +33,9 @@ export function DataProvider({ children }) {
     isLoading: true,
     error: null,
   });
+
+  // 안내문 생성 상태: { [aptId]: '생성' | '미생성' }
+  const [guideStatus, setGuideStatus] = useState(loadGuideStatus);
 
   useEffect(() => {
     loadData();
@@ -43,15 +65,45 @@ export function DataProvider({ children }) {
     loadData();
   };
 
-  // 오늘 예약 환자 (날짜 기준 필터)
+  // 안내문 생성 완료 처리 (aptId 기준)
+  const markGuideGenerated = (aptId) => {
+    if (!aptId) return;
+    // 이미 생성 상태면 중복 업데이트 안 함
+    if (guideStatus[aptId] === '생성') return;
+
+    const updated = { ...guideStatus, [aptId]: '생성' };
+    setGuideStatus(updated);
+    saveGuideStatus(updated);
+  };
+
+  // 특정 환자의 안내문 상태 가져오기
+  const getGuideStatus = (aptId) => {
+    return guideStatus[aptId] || '미생성';
+  };
+
+  // 오늘 예약 환자 (날짜 기준 필터) + 안내문 상태 반영
   const today = new Date().toISOString().split('T')[0];
-  const todayAppointments = data.allAppointments.filter(a => a.visitDate === today);
+  const todayAppointments = data.allAppointments
+    .filter(a => a.visitDate === today)
+    .map(a => ({
+      ...a,
+      guideStatus: getGuideStatus(a.aptId),
+    }));
+
+  // allAppointments에도 안내문 상태 반영
+  const allAppointmentsWithStatus = data.allAppointments.map(a => ({
+    ...a,
+    guideStatus: getGuideStatus(a.aptId),
+  }));
 
   return (
     <DataContext.Provider value={{
       ...data,
+      allAppointments: allAppointmentsWithStatus,
       todayAppointments,
       refreshData,
+      markGuideGenerated,
+      getGuideStatus,
     }}>
       {children}
     </DataContext.Provider>

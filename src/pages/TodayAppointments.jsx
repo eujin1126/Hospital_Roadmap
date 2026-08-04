@@ -38,8 +38,7 @@ function TodayAppointments() {
               <td>{apt.examCount}건</td>
               <td>
                 <span className={`guide-status ${
-                  apt.guideStatus === '확정됨' ? 'completed' :
-                  apt.guideStatus === '확인 필요' ? 'needed' : 'not-created'
+                  apt.guideStatus === '생성' ? 'completed' : 'not-created'
                 }`}>
                   {apt.guideStatus}
                 </span>

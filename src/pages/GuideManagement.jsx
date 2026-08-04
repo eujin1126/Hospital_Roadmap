@@ -6,10 +6,12 @@ import './GuideManagement.css';
 function GuideManagement() {
   const [activeTab, setActiveTab] = useState('completed');
   const navigate = useNavigate();
-  const { todayAppointments, isLoading } = useData();
+  const { todayAppointments, allAppointments, isLoading } = useData();
 
-  const completedGuides = todayAppointments.filter(a => a.guideStatus === '확정됨');
-  const pendingGuides = todayAppointments.filter(a => a.guideStatus === '확인 필요' || a.guideStatus === '미생성');
+  // 안내문 관리는 전체 예약 대상
+  const targetAppointments = allAppointments;
+  const completedGuides = targetAppointments.filter(a => a.guideStatus === '생성');
+  const pendingGuides = targetAppointments.filter(a => a.guideStatus === '미생성');
 
   const currentList = activeTab === 'completed' ? completedGuides : pendingGuides;
 
@@ -56,8 +58,7 @@ function GuideManagement() {
               <td>{item.examCount}건</td>
               <td>
                 <span className={`status-badge ${
-                  item.guideStatus === '확정됨' ? 'confirmed' :
-                  item.guideStatus === '확인 필요' ? 'warning' : 'pending'
+                  item.guideStatus === '생성' ? 'confirmed' : 'pending'
                 }`}>
                   {item.guideStatus}
                 </span>

@@ -97,7 +97,7 @@ function AIGuideGenerate() {
   const [guideExams, setGuideExams] = useState([]);
   const [isPdfSaving, setIsPdfSaving] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
-  const { patientDetails } = useData();
+  const { patientDetails, markGuideGenerated } = useData();
 
   const detail = patientDetails[aptId];
 
@@ -110,6 +110,8 @@ function AIGuideGenerate() {
     const timer = setTimeout(() => {
       if (detail) {
         setGuideExams(generateGuideData(detail));
+        // 안내문 생성 완료 상태 업데이트
+        markGuideGenerated(aptId);
       }
       setIsGenerating(false);
     }, 2000);
