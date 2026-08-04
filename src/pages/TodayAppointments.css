@@ -1,0 +1,90 @@
+.today-page {
+  max-width: 1100px;
+}
+
+.today-table {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+}
+
+.today-table thead {
+  background: #f8fafc;
+}
+
+.today-table th {
+  padding: 14px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  text-align: left;
+}
+
+.today-table td {
+  padding: 16px;
+  font-size: 14px;
+  color: #374151;
+  border-top: 1px solid #f1f5f9;
+}
+
+.today-table tr:hover {
+  background: #f8fafc;
+}
+
+.guide-status {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.guide-status.completed {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.guide-status.needed {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.guide-status.not-created {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.print-status {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.print-status.printed {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.print-status.not-printed {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.action-btn {
+  padding: 6px 14px;
+  border: 1px solid #4f8cff;
+  border-radius: 6px;
+  color: #4f8cff;
+  background: white;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.action-btn:hover {
+  background: #4f8cff;
+  color: white;
+}

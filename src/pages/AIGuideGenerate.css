@@ -1,0 +1,324 @@
+.ai-guide-page {
+  max-width: 900px;
+}
+
+.guide-doc {
+  background: white;
+  border-radius: 12px;
+  padding: 48px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.guide-doc-header {
+  text-align: center;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #1e293b;
+}
+
+.hospital-logo-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.hospital-logo-icon {
+  width: 48px;
+  height: 48px;
+  background: #166534;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.hospital-name {
+  font-size: 24px;
+  font-weight: 700;
+  color: #166534;
+}
+
+.guide-doc-type {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-top: 4px;
+}
+
+.guide-patient-info {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  padding: 12px 0;
+  margin-bottom: 24px;
+  font-size: 14px;
+  color: #374151;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.guide-patient-info span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.guide-patient-info strong {
+  color: #1e293b;
+}
+
+.guide-exam-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.guide-exam-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.guide-exam-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.guide-exam-number {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.guide-exam-location {
+  font-size: 13px;
+  color: #ef4444;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.guide-exam-wait {
+  font-size: 13px;
+  color: #4f8cff;
+  margin-left: 12px;
+}
+
+.guide-prep-section {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 16px;
+}
+
+.guide-prep-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  color: #374151;
+}
+
+.guide-prep-check {
+  color: #16a34a;
+  font-weight: bold;
+}
+
+.guide-prep-warn {
+  color: #f59e0b;
+  font-weight: bold;
+}
+
+.guide-map-container {
+  background: #f0f9ff;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 12px;
+}
+
+.guide-map-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #4f8cff;
+  text-align: center;
+  margin-bottom: 12px;
+  padding: 4px 12px;
+  background: #dbeafe;
+  border-radius: 12px;
+  display: inline-block;
+}
+
+.guide-map-flow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.guide-map-node {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.guide-map-node.start {
+  background: #dbeafe;
+  color: #1e40af;
+  border: 1px solid #93c5fd;
+}
+
+.guide-map-node.elevator {
+  background: white;
+  border: 1px solid #e2e8f0;
+  color: #374151;
+}
+
+.guide-map-node.destination {
+  background: #d1fae5;
+  color: #065f46;
+  border: 2px solid #4ade80;
+}
+
+.guide-map-arrow {
+  color: #94a3b8;
+  font-size: 16px;
+}
+
+.guide-map-people {
+  color: #64748b;
+  font-size: 14px;
+}
+
+.guide-direction {
+  font-size: 13px;
+  color: #374151;
+  padding: 8px 0;
+  line-height: 1.6;
+}
+
+.guide-direction-icon {
+  color: #f59e0b;
+  margin-right: 4px;
+}
+
+.guide-doc-footer {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.guide-footer-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.guide-qr {
+  width: 60px;
+  height: 60px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  color: #94a3b8;
+  text-align: center;
+}
+
+.guide-actions {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.guide-print-btn {
+  padding: 10px 20px;
+  background: #4f8cff;
+  color: white;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.guide-print-btn:hover {
+  background: #3b7aed;
+}
+
+.guide-back-btn {
+  padding: 10px 20px;
+  background: white;
+  color: #374151;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.guide-back-btn:hover {
+  background: #f1f5f9;
+}
+
+.generating-overlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 16px;
+}
+
+.generating-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #e2e8f0;
+  border-top-color: #4f8cff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.generating-text {
+  font-size: 16px;
+  color: #374151;
+  font-weight: 500;
+}
+
+@media print {
+  .guide-actions,
+  .ai-guide-page > .page-title,
+  .ai-guide-page > .back-link {
+    display: none !important;
+  }
+  
+  .guide-doc {
+    border: none;
+    box-shadow: none;
+    padding: 20px;
+  }
+}

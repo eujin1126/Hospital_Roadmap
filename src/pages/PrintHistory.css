@@ -1,0 +1,105 @@
+.print-history-page {
+  max-width: 1000px;
+}
+
+.print-summary {
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 24px;
+}
+
+.print-section {
+  margin-bottom: 32px;
+}
+
+.print-section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 16px;
+}
+
+.print-card {
+  background: white;
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-bottom: 10px;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.print-card-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.print-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.print-badge.done {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.print-badge.not-done {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.print-name {
+  font-weight: 600;
+  font-size: 15px;
+  color: #1e293b;
+}
+
+.print-detail {
+  font-size: 13px;
+  color: #64748b;
+  margin-left: 8px;
+}
+
+.print-card-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.reprint-btn {
+  padding: 6px 14px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  color: #374151;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+
+.reprint-btn:hover {
+  background: #e2e8f0;
+}
+
+.detail-link {
+  padding: 6px 14px;
+  border: 1px solid #4f8cff;
+  border-radius: 6px;
+  color: #4f8cff;
+  background: white;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.detail-link:hover {
+  background: #4f8cff;
+  color: white;
+}
