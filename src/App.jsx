@@ -12,6 +12,7 @@ import PrintHistory from './pages/PrintHistory';
 import Settings from './pages/Settings';
 import PatientDetail from './pages/PatientDetail';
 import AIGuideGenerate from './pages/AIGuideGenerate';
+import PublicGuide from './pages/PublicGuide';
 
 function ProtectedRoute({ children }) {
   const { user } = useAuth();
@@ -25,6 +26,8 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
+      {/* 공개 페이지: 로그인 없이 접근 가능 */}
+      <Route path="/public-guide/:aptId" element={<PublicGuide />} />
       <Route path="/" element={
         <ProtectedRoute>
           <Layout />

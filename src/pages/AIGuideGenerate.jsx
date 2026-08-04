@@ -166,32 +166,20 @@ function AIGuideGenerate() {
   const handleKakaoShare = async () => {
     setIsSharing(true);
     try {
-      // PDF 생성 → S3 업로드 → Presigned URL 획득 → 카카오 공유
-      const { pdf } = await generatePDF('guide-doc-content', pdfFileName);
-      const pdfBlob = pdfToBlob(pdf);
-      const fileUrl = await uploadPDFToS3(pdfBlob, pdfFileName);
-      
-      let shareUrl = window.location.href;
-      if (fileUrl) {
-        const presignedUrl = await getPresignedDownloadUrl(pdfFileName);
-        if (presignedUrl) shareUrl = presignedUrl;
-      }
+      // 로그인 없이 접근 가능한 공개 안내문 URL
+      const guideUrl = `${window.location.origin}/public-guide/${aptId}`;
+      const wayUrl = 'https://mm80.github.io/way4/';
 
       shareViaKakao({
         patientName: basicInfo.name,
         hospitalName: settings.hospitalName,
         examDate: appointmentInfo.date,
-        pdfUrl: shareUrl,
+        guideUrl,
+        wayUrl,
       });
     } catch (err) {
       console.error('카카오 공유 실패:', err);
-      // S3 없이 현재 페이지 URL로 공유
-      shareViaKakao({
-        patientName: basicInfo.name,
-        hospitalName: settings.hospitalName,
-        examDate: appointmentInfo.date,
-        pdfUrl: window.location.href,
-      });
+      alert('카카오 공유에 실패했습니다.');
     }
     setIsSharing(false);
   };
