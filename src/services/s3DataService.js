@@ -20,7 +20,7 @@ export function transformPatientData(rawData) {
   const normalizedData = rawData.map(row => ({
     ...row,
     visitDate: normalizeDate(row.visitDate),
-    time: row.time || '',
+    time: normalizeTime(row.time),
   }));
 
   // 환자 목록 (전체 환자 목록 페이지용) - reservationId 기준 중복 제거
@@ -33,9 +33,9 @@ export function transformPatientData(rawData) {
         fullName: row.name,
         birthDate: extractBirthDate(row.rrn),
         gender: row.gender === 'F' ? '여' : '남',
-        phone: '010-****-****',
+        phone: row.phone || '-',
         department: row.department,
-        lastVisit: `${row.visitDate} ${row.time}`.trim(),
+        lastVisit: `${row.visitDate} ${normalizeTime(row.time)}`.trim(),
         age: parseInt(row.age) || 0,
       });
     }
@@ -55,7 +55,7 @@ export function transformPatientData(rawData) {
         name: maskName(row.name),
         fullName: row.name,
         birthDate: extractBirthDate(row.rrn),
-        time: row.time,
+        time: normalizeTime(row.time),
         department: row.department,
         examCount: 0,
         exams: [],
@@ -64,6 +64,7 @@ export function transformPatientData(rawData) {
         age: parseInt(row.age) || 0,
         gender: row.gender === 'F' ? '여' : '남',
         visitDate: row.visitDate,
+        phone: row.phone || '-',
         note: row.note || '',
       });
     }
@@ -119,7 +120,7 @@ export function transformPatientData(rawData) {
         birthDate: apt.birthDate,
         aptId: apt.aptId,
         registrationId: apt.patientId,
-        phone: '010-****-****',
+        phone: apt.phone || '-',
         guardian: '-',
       },
       appointmentInfo: {
@@ -202,4 +203,34 @@ function extractBirthDate(rrn) {
     year = '20' + year;
   }
   return `${year}-${month}-${day}`;
+}
+
+// 시간 정규화: "9:00:00 AM" → "9:00", "2:30:00 PM" → "14:30"
+function normalizeTime(timeVal) {
+  if (!timeVal) return '';
+  const str = String(timeVal).trim();
+  
+  // 이미 HH:MM 24시간 형식인 경우 (초 없이)
+  if (/^\d{1,2}:\d{2}$/.test(str)) return str;
+  
+  // AM/PM 형식 처리
+  const ampmMatch = str.match(/^(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM|am|pm)?$/i);
+  if (ampmMatch) {
+    let hours = parseInt(ampmMatch[1]);
+    const minutes = ampmMatch[2];
+    const period = (ampmMatch[3] || '').toUpperCase();
+    
+    if (period === 'PM' && hours !== 12) {
+      hours += 12;
+    } else if (period === 'AM' && hours === 12) {
+      hours = 0;
+    }
+    return `${hours}:${minutes}`;
+  }
+  
+  // HH:MM:SS 형식 (AM/PM 없이) → HH:MM으로 자르기
+  const timeMatch = str.match(/^(\d{1,2}:\d{2}):\d{2}$/);
+  if (timeMatch) return timeMatch[1];
+  
+  return str;
 }
