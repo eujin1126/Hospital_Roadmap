@@ -325,7 +325,55 @@
   .guide-doc {
     border: none;
     box-shadow: none;
-    padding: 20px;
+    padding: 10px;
+    font-size: 11px;
+  }
+
+  .guide-doc-header {
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+  }
+
+  .hospital-name {
+    font-size: 18px;
+  }
+
+  .guide-doc-type {
+    font-size: 14px;
+  }
+
+  .guide-patient-info {
+    font-size: 12px;
+    gap: 16px;
+    margin-bottom: 12px;
+    padding: 8px 0;
+  }
+
+  .guide-exam-title {
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+
+  .guide-exam-card {
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+
+  .guide-exam-number {
+    font-size: 14px;
+  }
+
+  .guide-map-container {
+    padding: 10px;
+    margin-bottom: 8px;
+  }
+
+  .guide-prep-item {
+    font-size: 11px;
+  }
+
+  .guide-direction {
+    font-size: 11px;
   }
 
   .sidebar {
@@ -335,5 +383,14 @@
   .main-content {
     margin-left: 0 !important;
     padding: 0 !important;
+  }
+
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+
+  .ai-guide-page {
+    width: 100%;
   }
 }

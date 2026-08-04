@@ -201,7 +201,7 @@ export const currentUser = {
 
 // 설정 데이터
 export const settings = {
-  hospitalName: '나그네대학병원',
+  hospitalName: '강원대학교병원',
   phone: '02-1234-5678',
   qrEnabled: true,
   defaultFontSize: '12px',
