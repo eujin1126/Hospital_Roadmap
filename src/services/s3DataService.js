@@ -187,12 +187,21 @@ function normalizeDate(dateVal) {
   // 엑셀 시리얼 넘버인 경우
   const num = Number(dateVal);
   if (!isNaN(num) && num > 40000) {
-    const date = new Date((num - 25569) * 86400 * 1000);
-    return date.toISOString().split('T')[0];
+    // 엑셀 기준일: 1899-12-30, UTC 정오 기준으로 계산하여 타임존 오차 방지
+    const date = new Date(Date.UTC(1899, 11, 30 + num, 12, 0, 0));
+    const y = date.getUTCFullYear();
+    const m = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const d = String(date.getUTCDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
   }
   // 다른 형식 시도
   const d = new Date(dateVal);
-  if (!isNaN(d.getTime())) return d.toISOString().split('T')[0];
+  if (!isNaN(d.getTime())) {
+    const y2 = d.getFullYear();
+    const m2 = String(d.getMonth() + 1).padStart(2, '0');
+    const d2 = String(d.getDate()).padStart(2, '0');
+    return `${y2}-${m2}-${d2}`;
+  }
   return String(dateVal);
 }
 
