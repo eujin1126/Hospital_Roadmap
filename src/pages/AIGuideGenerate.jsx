@@ -147,8 +147,7 @@ function AIGuideGenerate() {
         {/* 문서 헤더 */}
         <div className="guide-doc-header">
           <div className="hospital-logo-area">
-            <img src="/hospital-icon.svg" alt="병원 로고" className="hospital-logo-img" />
-            <span className="hospital-name">{settings.hospitalName}</span>
+            <img src="/knuh-logo.svg" alt="강원대학교병원" className="hospital-full-logo" />
           </div>
           <div className="guide-doc-type">검사 안내문</div>
         </div>

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 100">
+  <!-- KNU 텍스트 -->
+  <text x="10" y="55" font-family="Arial Black, sans-serif" font-size="48" font-weight="900" fill="#1a3a6b">KNU</text>
+  <!-- H with green swoosh -->
+  <text x="145" y="55" font-family="Arial Black, sans-serif" font-size="48" font-weight="900" fill="#1a3a6b">H</text>
+  <!-- Green swoosh over H -->
+  <path d="M140 15 Q160 5 175 20 Q185 30 170 45 Q160 35 150 30 Q145 25 140 15Z" fill="#3ba035"/>
+  <path d="M148 20 Q158 12 168 22 Q172 28 165 38 Q158 30 152 26Z" fill="#7ec840"/>
+  <!-- 강원대학교병원 -->
+  <text x="190" y="50" font-family="'Malgun Gothic', sans-serif" font-size="32" font-weight="700" fill="#1a3a6b">강원대학교병원</text>
+  <!-- English subtitle -->
+  <text x="190" y="78" font-family="Arial, sans-serif" font-size="13" fill="#1a3a6b">Kangwon National University Hospital</text>
+</svg>
