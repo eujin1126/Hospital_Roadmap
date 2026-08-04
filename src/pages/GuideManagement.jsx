@@ -40,7 +40,7 @@ function GuideManagement() {
             <th>진료과</th>
             <th>검사수</th>
             <th>상태</th>
-            <th></th>
+            <th>안내문</th>
           </tr>
         </thead>
         <tbody>
@@ -64,7 +64,7 @@ function GuideManagement() {
                   className="view-btn"
                   onClick={() => navigate(`/patient/${item.aptId}`)}
                 >
-                  면신
+                  자세히
                 </button>
               </td>
             </tr>

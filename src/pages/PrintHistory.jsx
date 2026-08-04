@@ -43,7 +43,7 @@ function PrintHistory() {
                 className="detail-link"
                 onClick={() => navigate(`/patient/APT-00${idx + 2}`)}
               >
-                상세보기
+                안내문 생성
               </button>
             </div>
           </div>

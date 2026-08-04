@@ -39,6 +39,11 @@
   object-fit: contain;
 }
 
+.logo-emoji {
+  font-size: 22px;
+  line-height: 1;
+}
+
 .logo-title {
   font-size: 17px;
   font-weight: 700;

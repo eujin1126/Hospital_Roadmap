@@ -102,10 +102,9 @@ function PatientDetail() {
       </div>
 
       <div className="pre-exam-section">
-        <h3 className="pre-exam-title">⚠️ 검사 전 확인사항</h3>
+        <h3 className="pre-exam-title">검사 전 확인사항</h3>
         <div className="pre-exam-grid">
           <div className="pre-exam-item">
-            <div className="pre-exam-icon">🏥</div>
             <div className="pre-exam-label">금식 여부</div>
             <span className={`pre-exam-status ${preExamChecks.fasting.status.includes('필요') ? 'required' : 'none'}`}>
               {preExamChecks.fasting.status}
@@ -113,7 +112,6 @@ function PatientDetail() {
             <span className="pre-exam-detail">{preExamChecks.fasting.detail}</span>
           </div>
           <div className="pre-exam-item">
-            <div className="pre-exam-icon">🫒</div>
             <div className="pre-exam-label">알레르기</div>
             <span className={`pre-exam-status ${preExamChecks.allergy.status === '없음' ? 'none' : 'required'}`}>
               {preExamChecks.allergy.status}
@@ -121,7 +119,6 @@ function PatientDetail() {
             <span className="pre-exam-detail">{preExamChecks.allergy.detail}</span>
           </div>
           <div className="pre-exam-item">
-            <div className="pre-exam-icon">💉</div>
             <div className="pre-exam-label">조영제 사용</div>
             <span className={`pre-exam-status ${preExamChecks.contrastAgent.status === '해당 없음' ? 'none' : 'required'}`}>
               {preExamChecks.contrastAgent.status}
@@ -129,7 +126,6 @@ function PatientDetail() {
             <span className="pre-exam-detail">{preExamChecks.contrastAgent.detail}</span>
           </div>
           <div className="pre-exam-item">
-            <div className="pre-exam-icon">🧲</div>
             <div className="pre-exam-label">MRI 금속 여부</div>
             <span className={`pre-exam-status ${preExamChecks.mriMetal.status === '해당 없음' ? 'none' : 'required'}`}>
               {preExamChecks.mriMetal.status}
@@ -137,7 +133,6 @@ function PatientDetail() {
             <span className="pre-exam-detail">{preExamChecks.mriMetal.detail}</span>
           </div>
           <div className="pre-exam-item">
-            <div className="pre-exam-icon">📋</div>
             <div className="pre-exam-label">기타 주의사항</div>
             <span className={`pre-exam-status ${preExamChecks.others.status === '없음' ? 'none' : 'required'}`}>
               {preExamChecks.others.status}
