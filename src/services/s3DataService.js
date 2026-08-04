@@ -29,7 +29,7 @@ export function transformPatientData(rawData) {
     if (!patientMap.has(row.reservationId)) {
       patientMap.set(row.reservationId, {
         id: row.reservationId,
-        name: maskName(row.name),
+        name: row.name,
         fullName: row.name,
         birthDate: extractBirthDate(row.rrn),
         gender: row.gender === 'F' ? '여' : '남',
@@ -52,7 +52,7 @@ export function transformPatientData(rawData) {
       appointmentMap.set(row.reservationId, {
         aptId,
         patientId: row.reservationId,
-        name: maskName(row.name),
+        name: row.name,
         fullName: row.name,
         birthDate: extractBirthDate(row.rrn),
         time: normalizeTime(row.time),
