@@ -284,21 +284,29 @@ function AIGuideGenerate() {
               <div style={{ textAlign: 'center', marginBottom: '12px' }}>
                 <span className="guide-map-title">{exam.guideInfo.floor} 안내도</span>
               </div>
-              <div className="guide-map-flow">
-                {exam.guideInfo.mapNodes.map((node, i) => (
-                  <span key={i} style={{ display: 'contents' }}>
-                    <div className={`guide-map-node ${node.type}`}>
-                      {node.label.split('\n').map((line, li) => (
-                        <span key={li}>{line}{li < node.label.split('\n').length - 1 && <br/>}</span>
-                      ))}
-                    </div>
-                    {i < exam.guideInfo.mapNodes.length - 1 && (
-                      <span className="guide-map-arrow">- - - →</span>
-                    )}
-                  </span>
-                ))}
-                <span className="guide-map-people">🧑‍🤝‍🧑</span>
-              </div>
+              {exam.floorMapImage ? (
+                <img
+                  src={exam.floorMapImage}
+                  alt={`${exam.guideInfo.floor} 층별 안내도`}
+                  className="guide-floor-map-img"
+                  crossOrigin="anonymous"
+                />
+              ) : (
+                <div className="guide-map-flow">
+                  {exam.guideInfo.mapNodes.map((node, i) => (
+                    <span key={i} style={{ display: 'contents' }}>
+                      <div className={`guide-map-node ${node.type}`}>
+                        {node.label.split('\n').map((line, li) => (
+                          <span key={li}>{line}{li < node.label.split('\n').length - 1 && <br/>}</span>
+                        ))}
+                      </div>
+                      {i < exam.guideInfo.mapNodes.length - 1 && (
+                        <span className="guide-map-arrow">- - - →</span>
+                      )}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* 이동 안내 */}

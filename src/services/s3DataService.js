@@ -74,6 +74,7 @@ export function transformPatientData(rawData) {
     const examItems = examStr.split(/\s*(?:→|->)\s*/).filter(e => e.trim() !== '');
     if (examItems.length > 0) {
       examItems.forEach(examName => {
+        const floorInfo = getExamFloorMapImage(examName.trim(), row.department);
         apt.exams.push({
           order: apt.exams.length + 1,
           name: examName.trim(),
@@ -81,10 +82,13 @@ export function transformPatientData(rawData) {
           description: row.instruction || '',
           location: getExamLocation(examName.trim()),
           waitTime: getExamWaitTime(examName.trim()),
+          floor: floorInfo.floor,
+          floorMapImage: floorInfo.imageUrl,
         });
       });
       apt.examCount = apt.exams.length;
     } else {
+      const floorInfo = getExamFloorMapImage('', row.department);
       apt.exams.push({
         order: apt.exams.length + 1,
         name: '검사',
@@ -92,6 +96,8 @@ export function transformPatientData(rawData) {
         description: row.instruction || '',
         location: row.location || '',
         waitTime: '약 10분',
+        floor: floorInfo.floor,
+        floorMapImage: floorInfo.imageUrl,
       });
       apt.examCount = apt.exams.length;
     }
@@ -293,3 +299,98 @@ function getExamWaitTime(examName) {
   if (name.includes('골밀도')) return '약 10분';
   return '약 15분';
 }
+
+// S3 이미지 베이스 URL
+const S3_MAP_BASE = 'https://hospital-demo-data-6zo.s3.us-east-1.amazonaws.com/maps';
+
+// 검사명 → 층 코드 매핑
+function getExamFloor(examName) {
+  const name = examName.toLowerCase();
+  if (name.includes('ct') || name.includes('x-ray') || name.includes('x ray') || name.includes('흉부')) return '1f';
+  if (name.includes('mri')) return 'b1';
+  if (name.includes('혈액') || name.includes('채혈')) return '2f';
+  if (name.includes('초음파')) return '1f';
+  if (name.includes('심전도') || name.includes('ecg') || name.includes('심장')) return '2f';
+  if (name.includes('내시경')) return '2f';
+  if (name.includes('폐기능') || name.includes('호흡')) return '2f';
+  if (name.includes('소변') || name.includes('뇨')) return '2f';
+  if (name.includes('골밀도')) return '1f';
+  if (name.includes('수술')) return '3f';
+  return null;
+}
+
+// 진료과 → 층 코드 매핑
+function getDepartmentFloor(department) {
+  if (!department) return null;
+  const dept = department.trim();
+  
+  const floorMap = {
+    // 1층
+    '영상의학과': '1f',
+    '정형외과': '1f',
+    '재활의학과': '1f',
+    '가정의학과': '1f',
+    '소화기센터': '1f',
+    '응급의학과': '1f',
+    // 2층
+    '외과': '2f',
+    '이비인후과': '2f',
+    '피부과': '2f',
+    '안과': '2f',
+    '호흡기내과': '2f',
+    '알레르기내과': '2f',
+    '내과': '2f',
+    '소화기내과': '2f',
+    '신장내과': '2f',
+    '감염내과': '2f',
+    '비뇨의학과': '2f',
+    '비뇨기과': '2f',
+    '정신건강의학과': '2f',
+    '혈액종양내과': '2f',
+    '성형외과': '2f',
+    '신경외과': '2f',
+    '신경과': '2f',
+    '심장외과': '2f',
+    '흉부외과': '2f',
+    '치과': '2f',
+    '구강외과': '2f',
+    '산부인과': '2f',
+    '류머티스내과': '2f',
+    '호흡기·알레르기내과': '2f',
+    // 3층
+    '수술실': '3f',
+    // 6층
+    '진단검사의학과': '6f',
+    // B1
+    '방사선종양학과': 'b1',
+    '약제과': 'b1',
+  };
+
+  // 정확한 매칭 시도
+  if (floorMap[dept]) return floorMap[dept];
+  
+  // 부분 매칭 시도
+  for (const [key, floor] of Object.entries(floorMap)) {
+    if (dept.includes(key) || key.includes(dept)) return floor;
+  }
+  
+  return null;
+}
+
+// 층 코드 → 안내도 이미지 URL
+function getFloorMapImageUrl(floorCode) {
+  if (!floorCode) return null;
+  return `${S3_MAP_BASE}/${floorCode}-map.png`;
+}
+
+// 검사의 층별 안내도 이미지 URL 가져오기 (검사명 우선, 없으면 진료과 기준)
+export function getExamFloorMapImage(examName, department) {
+  const floorByExam = getExamFloor(examName);
+  if (floorByExam) return { floor: floorByExam, imageUrl: getFloorMapImageUrl(floorByExam) };
+  
+  const floorByDept = getDepartmentFloor(department);
+  if (floorByDept) return { floor: floorByDept, imageUrl: getFloorMapImageUrl(floorByDept) };
+  
+  return { floor: null, imageUrl: null };
+}
+

@@ -159,6 +159,14 @@
   margin-bottom: 12px;
 }
 
+.guide-floor-map-img {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
 .guide-map-title {
   font-size: 13px;
   font-weight: 600;
