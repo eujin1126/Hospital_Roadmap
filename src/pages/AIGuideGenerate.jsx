@@ -168,7 +168,7 @@ function AIGuideGenerate() {
     try {
       // 로그인 없이 접근 가능한 공개 안내문 URL
       const guideUrl = `${window.location.origin}/public-guide/${aptId}`;
-      const wayUrl = 'https://mm80.github.io/way4/';
+      const wayUrl = `${window.location.origin}/way`;
 
       shareViaKakao({
         patientName: basicInfo.name,
