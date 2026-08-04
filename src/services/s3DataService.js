@@ -69,15 +69,32 @@ export function transformPatientData(rawData) {
       });
     }
     const apt = appointmentMap.get(row.reservationId);
-    apt.examCount += 1;
-    apt.exams.push({
-      order: apt.exams.length + 1,
-      name: row.exam || row.examCode || '검사',
-      code: row.examCode || '',
-      description: row.instruction || '',
-      location: row.location || '',
-      waitTime: '약 10분',
-    });
+    // exam 필드를 → 또는 -> 구분자로 분리하여 각각 독립 검사로 추가
+    const examStr = row.exam || row.examCode || '';
+    const examItems = examStr.split(/\s*(?:→|->)\s*/).filter(e => e.trim() !== '');
+    if (examItems.length > 0) {
+      examItems.forEach(examName => {
+        apt.exams.push({
+          order: apt.exams.length + 1,
+          name: examName.trim(),
+          code: row.examCode || '',
+          description: row.instruction || '',
+          location: getExamLocation(examName.trim()),
+          waitTime: getExamWaitTime(examName.trim()),
+        });
+      });
+      apt.examCount = apt.exams.length;
+    } else {
+      apt.exams.push({
+        order: apt.exams.length + 1,
+        name: '검사',
+        code: row.examCode || '',
+        description: row.instruction || '',
+        location: row.location || '',
+        waitTime: '약 10분',
+      });
+      apt.examCount = apt.exams.length;
+    }
   });
   const allAppointments = Array.from(appointmentMap.values());
 
@@ -233,4 +250,37 @@ function normalizeTime(timeVal) {
   if (timeMatch) return timeMatch[1];
   
   return str;
+}
+
+// 검사명에 따른 검사 위치 반환
+function getExamLocation(examName) {
+  const name = examName.toLowerCase();
+  if (name.includes('ct')) return '1층 영상의학과 CT실';
+  if (name.includes('mri')) return '지하1층 MRI실';
+  if (name.includes('x-ray') || name.includes('x ray') || name.includes('흉부')) return '1층 영상의학과 X-ray실';
+  if (name.includes('혈액')) return '2층 검사실 A';
+  if (name.includes('초음파')) return '2층 초음파실';
+  if (name.includes('심전도') || name.includes('ecg')) return '3층 심장검사실';
+  if (name.includes('내시경')) return '2층 내시경실';
+  if (name.includes('폐기능')) return '3층 호흡기검사실';
+  if (name.includes('소변') || name.includes('뇨')) return '2층 검사실 B';
+  if (name.includes('골밀도')) return '1층 영상의학과';
+  if (name.includes('위')) return '2층 내시경실';
+  return '검사실 (접수 후 안내)';
+}
+
+// 검사명에 따른 예상 소요시간 반환
+function getExamWaitTime(examName) {
+  const name = examName.toLowerCase();
+  if (name.includes('ct')) return '약 20분';
+  if (name.includes('mri')) return '약 40분';
+  if (name.includes('x-ray') || name.includes('x ray') || name.includes('흉부')) return '약 10분';
+  if (name.includes('혈액')) return '약 10분';
+  if (name.includes('초음파')) return '약 20분';
+  if (name.includes('심전도') || name.includes('ecg')) return '약 15분';
+  if (name.includes('내시경')) return '약 30분';
+  if (name.includes('폐기능')) return '약 15분';
+  if (name.includes('소변') || name.includes('뇨')) return '약 5분';
+  if (name.includes('골밀도')) return '약 10분';
+  return '약 15분';
 }
