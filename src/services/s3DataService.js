@@ -5,19 +5,27 @@ const S3_URL = 'https://hospital-demo-data-6zo.s3.us-east-1.amazonaws.com/patien
 // S3에서 xlsx 파일을 가져와 JSON으로 변환
 export async function fetchPatientData() {
   const response = await fetch(S3_URL);
+  if (!response.ok) throw new Error(`S3 fetch failed: ${response.status}`);
   const arrayBuffer = await response.arrayBuffer();
   const workbook = XLSX.read(arrayBuffer, { type: 'array' });
   const sheetName = workbook.SheetNames[0];
   const worksheet = workbook.Sheets[sheetName];
-  const rawData = XLSX.utils.sheet_to_json(worksheet);
+  const rawData = XLSX.utils.sheet_to_json(worksheet, { raw: false });
   return rawData;
 }
 
 // S3 데이터를 앱에서 사용하는 형식으로 변환
 export function transformPatientData(rawData) {
-  // 환자 목록 (전체 환자 목록 페이지용) - 중복 제거
+  // visitDate 정규화 (엑셀 날짜 형식 처리)
+  const normalizedData = rawData.map(row => ({
+    ...row,
+    visitDate: normalizeDate(row.visitDate),
+    time: row.time || '',
+  }));
+
+  // 환자 목록 (전체 환자 목록 페이지용) - reservationId 기준 중복 제거
   const patientMap = new Map();
-  rawData.forEach(row => {
+  normalizedData.forEach(row => {
     if (!patientMap.has(row.reservationId)) {
       patientMap.set(row.reservationId, {
         id: row.reservationId,
@@ -25,39 +33,38 @@ export function transformPatientData(rawData) {
         fullName: row.name,
         birthDate: extractBirthDate(row.rrn),
         gender: row.gender === 'F' ? '여' : '남',
-        phone: '010-****-****', // rrn에서 전화번호 추출 불가, 마스킹
+        phone: '010-****-****',
         department: row.department,
-        lastVisit: `${row.visitDate} ${row.time || ''}`.trim(),
-        age: row.age,
+        lastVisit: `${row.visitDate} ${row.time}`.trim(),
+        age: parseInt(row.age) || 0,
       });
     }
   });
   const patients = Array.from(patientMap.values());
 
-  // 오늘 예약 환자 (visitDate 기준)
-  const today = new Date().toISOString().split('T')[0];
-  const todayRows = rawData.filter(row => row.visitDate === today || row.visitDate);
-  
-  // 접수번호별 예약 데이터 그룹핑
+  // 모든 예약 데이터를 reservationId 기준으로 그룹핑
   const appointmentMap = new Map();
-  rawData.forEach((row, idx) => {
-    const aptId = `APT-${String(idx + 1).padStart(3, '0')}`;
+  let aptCounter = 1;
+  normalizedData.forEach(row => {
     if (!appointmentMap.has(row.reservationId)) {
+      const aptId = `APT-${String(aptCounter).padStart(3, '0')}`;
+      aptCounter++;
       appointmentMap.set(row.reservationId, {
         aptId,
         patientId: row.reservationId,
         name: maskName(row.name),
         fullName: row.name,
         birthDate: extractBirthDate(row.rrn),
-        time: row.time || '',
+        time: row.time,
         department: row.department,
         examCount: 0,
         exams: [],
         guideStatus: row.status === 'RESERVED' ? '미생성' : '확정됨',
-        printStatus: row.checkedIn === 1 ? '출력됨' : '미출력',
-        age: row.age,
+        printStatus: parseInt(row.checkedIn) === 1 ? '출력됨' : '미출력',
+        age: parseInt(row.age) || 0,
         gender: row.gender === 'F' ? '여' : '남',
         visitDate: row.visitDate,
+        note: row.note || '',
       });
     }
     const apt = appointmentMap.get(row.reservationId);
@@ -65,16 +72,45 @@ export function transformPatientData(rawData) {
     apt.exams.push({
       order: apt.exams.length + 1,
       name: row.exam || row.examCode || '검사',
+      code: row.examCode || '',
       description: row.instruction || '',
       location: row.location || '',
       waitTime: '약 10분',
     });
   });
-  const todayAppointments = Array.from(appointmentMap.values());
+  const allAppointments = Array.from(appointmentMap.values());
+
+  // 날짜별 예약 그룹핑 (캘린더용)
+  const calendarData = {};
+  allAppointments.forEach(apt => {
+    if (apt.visitDate) {
+      calendarData[apt.visitDate] = (calendarData[apt.visitDate] || 0) + 1;
+    }
+  });
+
+  // 날짜별 예약 상세 목록 (캘린더 오른쪽 패널용)
+  const appointmentsByDate = {};
+  allAppointments.forEach(apt => {
+    if (!apt.visitDate) return;
+    if (!appointmentsByDate[apt.visitDate]) {
+      appointmentsByDate[apt.visitDate] = [];
+    }
+    appointmentsByDate[apt.visitDate].push({
+      time: apt.time,
+      name: apt.name,
+      department: apt.department,
+      doctor: '-',
+      status: apt.guideStatus === '확정됨' ? '확정' : '대기',
+    });
+  });
+  // 시간순 정렬
+  Object.keys(appointmentsByDate).forEach(date => {
+    appointmentsByDate[date].sort((a, b) => a.time.localeCompare(b.time));
+  });
 
   // 환자 상세 정보
   const patientDetails = {};
-  todayAppointments.forEach(apt => {
+  allAppointments.forEach(apt => {
     patientDetails[apt.aptId] = {
       basicInfo: {
         name: apt.fullName,
@@ -99,17 +135,47 @@ export function transformPatientData(rawData) {
         allergy: { status: '해당 없음', detail: '' },
         contrastAgent: { status: apt.exams.some(e => e.name.includes('CT') || e.name.includes('조영')) ? '사용' : '해당 없음', detail: '' },
         mriMetal: { status: apt.exams.some(e => e.name.includes('MRI')) ? '확인 필요' : '해당 없음', detail: '' },
-        others: { status: '없음', detail: apt.exams.map(e => e.description).filter(Boolean).join(', ') || '' },
+        others: { status: apt.note || '없음', detail: apt.exams.map(e => e.description).filter(Boolean).join(', ') || '' },
       },
       exams: apt.exams,
     };
   });
 
+  // 진료과별 현황
+  const deptCountMap = {};
+  allAppointments.forEach(apt => {
+    deptCountMap[apt.department] = (deptCountMap[apt.department] || 0) + 1;
+  });
+  const departmentStats = Object.entries(deptCountMap).map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count);
+
   return {
     patients,
-    todayAppointments,
+    allAppointments,
+    calendarData,
+    appointmentsByDate,
     patientDetails,
+    departmentStats,
   };
+}
+
+// 날짜 정규화 (2026-08-10 형태로 통일)
+function normalizeDate(dateVal) {
+  if (!dateVal) return '';
+  // 이미 YYYY-MM-DD 형식인 경우
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateVal)) return dateVal;
+  // YYYY/MM/DD 형식
+  if (/^\d{4}\/\d{2}\/\d{2}$/.test(dateVal)) return dateVal.replace(/\//g, '-');
+  // 엑셀 시리얼 넘버인 경우
+  const num = Number(dateVal);
+  if (!isNaN(num) && num > 40000) {
+    const date = new Date((num - 25569) * 86400 * 1000);
+    return date.toISOString().split('T')[0];
+  }
+  // 다른 형식 시도
+  const d = new Date(dateVal);
+  if (!isNaN(d.getTime())) return d.toISOString().split('T')[0];
+  return String(dateVal);
 }
 
 // 이름 마스킹 (예: 김영희 → 김*희)

@@ -1,20 +1,27 @@
 import { useNavigate } from 'react-router-dom';
-import { printHistory } from '../data/mockData';
+import { useData } from '../context/DataContext';
 import './PrintHistory.css';
 
 function PrintHistory() {
   const navigate = useNavigate();
+  const { allAppointments, isLoading } = useData();
+
+  if (isLoading) return <div className="print-history-page"><p>데이터 로딩 중...</p></div>;
+
+  const printed = allAppointments.filter(a => a.printStatus === '출력됨');
+  const notPrinted = allAppointments.filter(a => a.printStatus !== '출력됨');
 
   return (
     <div className="print-history-page">
       <h1 className="page-title">출력 이력</h1>
       <p className="print-summary">
-        출력 완료 {printHistory.completed.length}건 / 미출력 {printHistory.pending.length}건
+        출력 완료 {printed.length}건 / 미출력 {notPrinted.length}건
       </p>
 
       <div className="print-section">
         <h2 className="print-section-title">출력 완료</h2>
-        {printHistory.completed.map((item, idx) => (
+        {printed.length === 0 && <p style={{color:'#94a3b8',fontSize:'14px'}}>출력 완료된 안내문이 없습니다.</p>}
+        {printed.map((item, idx) => (
           <div key={idx} className="print-card">
             <div className="print-card-left">
               <span className="print-badge done">출력됨</span>
@@ -22,7 +29,7 @@ function PrintHistory() {
               <span className="print-detail">{item.department} | {item.time}</span>
             </div>
             <div className="print-card-right">
-              <span>출력: {item.printDate}</span>
+              <span>{item.visitDate}</span>
               <button className="reprint-btn">재출력</button>
             </div>
           </div>
@@ -31,7 +38,8 @@ function PrintHistory() {
 
       <div className="print-section">
         <h2 className="print-section-title">미출력</h2>
-        {printHistory.pending.map((item, idx) => (
+        {notPrinted.length === 0 && <p style={{color:'#94a3b8',fontSize:'14px'}}>미출력 안내문이 없습니다.</p>}
+        {notPrinted.map((item, idx) => (
           <div key={idx} className="print-card">
             <div className="print-card-left">
               <span className="print-badge not-done">미출력</span>
@@ -41,7 +49,7 @@ function PrintHistory() {
             <div className="print-card-right">
               <button
                 className="detail-link"
-                onClick={() => navigate(`/ai-guide/APT-00${idx + 2}`)}
+                onClick={() => navigate(`/ai-guide/${item.aptId}`)}
               >
                 안내문 생성
               </button>
