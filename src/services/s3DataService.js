@@ -380,7 +380,9 @@ function getDepartmentFloor(department) {
 // 층 코드 → 안내도 이미지 URL
 function getFloorMapImageUrl(floorCode) {
   if (!floorCode) return null;
-  return `${S3_MAP_BASE}/${floorCode}-map.png`;
+  // 실제 S3 파일명: b1f.png, 1f.png, 2f.png ... 8f.png
+  const fileName = floorCode === 'b1' ? 'b1f.png' : `${floorCode}.png`;
+  return `${S3_MAP_BASE}/${fileName}`;
 }
 
 // 검사의 층별 안내도 이미지 URL 가져오기 (검사명 우선, 없으면 진료과 기준)
