@@ -42,7 +42,7 @@ function Sidebar() {
       <div className="sidebar-header">
         <div className="logo-section">
           <div className="logo-icon">
-            <span className="logo-emoji">🚩</span>
+            <img src="/heart-icon.svg" alt="로고" className="logo-img" />
           </div>
           <div>
             <h2 className="logo-title">병원길잡이</h2>

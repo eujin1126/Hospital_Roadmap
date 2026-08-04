@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- 하트 -->
+  <path d="M32 56 C32 56 8 40 8 24 C8 14 16 8 24 8 C28 8 31 10 32 13 C33 10 36 8 40 8 C48 8 56 14 56 24 C56 40 32 56 32 56Z" fill="#4f8cff"/>
+  <!-- 십자가 (하얀색) -->
+  <rect x="28" y="22" width="8" height="20" rx="2" fill="white"/>
+  <rect x="22" y="28" width="20" height="8" rx="2" fill="white"/>
+</svg>
