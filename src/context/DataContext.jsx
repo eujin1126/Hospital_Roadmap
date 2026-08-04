@@ -3,22 +3,21 @@ import { fetchPatientData, transformPatientData } from '../services/s3DataServic
 
 const DataContext = createContext(null);
 
-// localStorage에서 안내문 생성 상태 불러오기
-function loadGuideStatus() {
+// localStorage 유틸
+function loadFromStorage(key) {
   try {
-    const stored = localStorage.getItem('guideStatus');
+    const stored = localStorage.getItem(key);
     return stored ? JSON.parse(stored) : {};
   } catch {
     return {};
   }
 }
 
-// localStorage에 안내문 생성 상태 저장
-function saveGuideStatus(status) {
+function saveToStorage(key, value) {
   try {
-    localStorage.setItem('guideStatus', JSON.stringify(status));
+    localStorage.setItem(key, JSON.stringify(value));
   } catch (e) {
-    console.error('guideStatus 저장 실패:', e);
+    console.error(`${key} 저장 실패:`, e);
   }
 }
 
@@ -35,7 +34,9 @@ export function DataProvider({ children }) {
   });
 
   // 안내문 생성 상태: { [aptId]: '생성' | '미생성' }
-  const [guideStatus, setGuideStatus] = useState(loadGuideStatus);
+  const [guideStatus, setGuideStatus] = useState(() => loadFromStorage('guideStatus'));
+  // 인쇄 상태: { [aptId]: '출력' | '미출력' }
+  const [printStatus, setPrintStatus] = useState(() => loadFromStorage('printStatus'));
 
   useEffect(() => {
     loadData();
@@ -68,32 +69,40 @@ export function DataProvider({ children }) {
   // 안내문 생성 완료 처리 (aptId 기준)
   const markGuideGenerated = (aptId) => {
     if (!aptId) return;
-    // 이미 생성 상태면 중복 업데이트 안 함
     if (guideStatus[aptId] === '생성') return;
-
     const updated = { ...guideStatus, [aptId]: '생성' };
     setGuideStatus(updated);
-    saveGuideStatus(updated);
+    saveToStorage('guideStatus', updated);
   };
 
-  // 특정 환자의 안내문 상태 가져오기
-  const getGuideStatus = (aptId) => {
-    return guideStatus[aptId] || '미생성';
+  // 인쇄 완료 처리 (aptId 기준)
+  const markPrinted = (aptId) => {
+    if (!aptId) return;
+    if (printStatus[aptId] === '출력') return;
+    const updated = { ...printStatus, [aptId]: '출력' };
+    setPrintStatus(updated);
+    saveToStorage('printStatus', updated);
   };
 
-  // 오늘 예약 환자 (날짜 기준 필터) + 안내문 상태 반영
+  // 상태 가져오기 헬퍼
+  const getGuideStatus = (aptId) => guideStatus[aptId] || '미생성';
+  const getPrintStatus = (aptId) => printStatus[aptId] || '미출력';
+
+  // 오늘 예약 환자 (날짜 기준 필터) + 상태 반영
   const today = new Date().toISOString().split('T')[0];
   const todayAppointments = data.allAppointments
     .filter(a => a.visitDate === today)
     .map(a => ({
       ...a,
       guideStatus: getGuideStatus(a.aptId),
+      printStatus: getPrintStatus(a.aptId),
     }));
 
-  // allAppointments에도 안내문 상태 반영
+  // allAppointments에도 상태 반영
   const allAppointmentsWithStatus = data.allAppointments.map(a => ({
     ...a,
     guideStatus: getGuideStatus(a.aptId),
+    printStatus: getPrintStatus(a.aptId),
   }));
 
   return (
@@ -103,7 +112,9 @@ export function DataProvider({ children }) {
       todayAppointments,
       refreshData,
       markGuideGenerated,
+      markPrinted,
       getGuideStatus,
+      getPrintStatus,
     }}>
       {children}
     </DataContext.Provider>

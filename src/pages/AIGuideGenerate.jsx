@@ -97,7 +97,7 @@ function AIGuideGenerate() {
   const [guideExams, setGuideExams] = useState([]);
   const [isPdfSaving, setIsPdfSaving] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
-  const { patientDetails, markGuideGenerated } = useData();
+  const { patientDetails, markGuideGenerated, markPrinted } = useData();
 
   const detail = patientDetails[aptId];
 
@@ -132,7 +132,18 @@ function AIGuideGenerate() {
   const pdfFileName = `${basicInfo.registrationId}-exam-guide.pdf`;
 
   const handlePrint = () => {
+    // afterprint 이벤트로 인쇄 창 닫힌 후 상태 변경
+    const onAfterPrint = () => {
+      markPrinted(aptId);
+      window.removeEventListener('afterprint', onAfterPrint);
+    };
+    window.addEventListener('afterprint', onAfterPrint);
     window.print();
+    // fallback: afterprint가 지원되지 않는 환경을 위해 3초 후에도 체크
+    setTimeout(() => {
+      markPrinted(aptId);
+      window.removeEventListener('afterprint', onAfterPrint);
+    }, 3000);
   };
 
   const handlePdfSave = async () => {
