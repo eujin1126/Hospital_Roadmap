@@ -327,4 +327,13 @@
     box-shadow: none;
     padding: 20px;
   }
+
+  .sidebar {
+    display: none !important;
+  }
+
+  .main-content {
+    margin-left: 0 !important;
+    padding: 0 !important;
+  }
 }
