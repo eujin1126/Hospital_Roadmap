@@ -278,6 +278,40 @@
   background: #3b7aed;
 }
 
+.guide-pdf-btn {
+  padding: 10px 20px;
+  background: #ef4444;
+  color: white;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.guide-pdf-btn:hover {
+  background: #dc2626;
+}
+
+.guide-pdf-btn:disabled,
+.guide-kakao-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.guide-kakao-btn {
+  padding: 10px 20px;
+  background: #fee500;
+  color: #191919;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.guide-kakao-btn:hover {
+  background: #f0d800;
+}
+
 .guide-back-btn {
   padding: 10px 20px;
   background: white;

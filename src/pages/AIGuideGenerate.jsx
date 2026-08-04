@@ -2,6 +2,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useData } from '../context/DataContext';
 import { settings } from '../data/mockData';
+import { generatePDF, downloadPDF, pdfToBlob, uploadPDFToS3, getPresignedDownloadUrl } from '../services/pdfService';
+import { initKakao, shareViaKakao } from '../services/kakaoService';
 import './AIGuideGenerate.css';
 
 // AI가 생성하는 안내문 데이터 (시뮬레이션)
@@ -93,9 +95,15 @@ function AIGuideGenerate() {
   const navigate = useNavigate();
   const [isGenerating, setIsGenerating] = useState(true);
   const [guideExams, setGuideExams] = useState([]);
+  const [isPdfSaving, setIsPdfSaving] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
   const { patientDetails } = useData();
 
   const detail = patientDetails[aptId];
+
+  useEffect(() => {
+    initKakao();
+  }, []);
 
   useEffect(() => {
     // AI 생성 시뮬레이션 (2초 딜레이)
@@ -119,8 +127,73 @@ function AIGuideGenerate() {
 
   const { basicInfo, appointmentInfo } = detail;
 
+  const pdfFileName = `${basicInfo.registrationId}-exam-guide.pdf`;
+
   const handlePrint = () => {
     window.print();
+  };
+
+  const handlePdfSave = async () => {
+    setIsPdfSaving(true);
+    try {
+      const { pdf, fileName } = await generatePDF('guide-doc-content', pdfFileName);
+      
+      // S3 업로드 시도
+      const pdfBlob = pdfToBlob(pdf);
+      const fileUrl = await uploadPDFToS3(pdfBlob, fileName);
+      
+      if (fileUrl) {
+        alert('PDF가 S3에 저장되었습니다.');
+      } else {
+        // S3 미설정 시 로컬 다운로드
+        downloadPDF(pdf, fileName);
+        alert('PDF가 로컬에 저장되었습니다.');
+      }
+    } catch (err) {
+      console.error('PDF 저장 실패:', err);
+      // 실패 시 로컬 다운로드 시도
+      try {
+        const { pdf, fileName } = await generatePDF('guide-doc-content', pdfFileName);
+        downloadPDF(pdf, fileName);
+        alert('PDF가 로컬에 저장되었습니다.');
+      } catch (e) {
+        alert('PDF 생성에 실패했습니다.');
+      }
+    }
+    setIsPdfSaving(false);
+  };
+
+  const handleKakaoShare = async () => {
+    setIsSharing(true);
+    try {
+      // PDF 생성 → S3 업로드 → Presigned URL 획득 → 카카오 공유
+      const { pdf } = await generatePDF('guide-doc-content', pdfFileName);
+      const pdfBlob = pdfToBlob(pdf);
+      const fileUrl = await uploadPDFToS3(pdfBlob, pdfFileName);
+      
+      let shareUrl = window.location.href;
+      if (fileUrl) {
+        const presignedUrl = await getPresignedDownloadUrl(pdfFileName);
+        if (presignedUrl) shareUrl = presignedUrl;
+      }
+
+      shareViaKakao({
+        patientName: basicInfo.name,
+        hospitalName: settings.hospitalName,
+        examDate: appointmentInfo.date,
+        pdfUrl: shareUrl,
+      });
+    } catch (err) {
+      console.error('카카오 공유 실패:', err);
+      // S3 없이 현재 페이지 URL로 공유
+      shareViaKakao({
+        patientName: basicInfo.name,
+        hospitalName: settings.hospitalName,
+        examDate: appointmentInfo.date,
+        pdfUrl: window.location.href,
+      });
+    }
+    setIsSharing(false);
   };
 
   if (isGenerating) {
@@ -141,9 +214,15 @@ function AIGuideGenerate() {
       <div className="guide-actions">
         <button className="guide-back-btn" onClick={() => navigate(-1)}>← 돌아가기</button>
         <button className="guide-print-btn" onClick={handlePrint}>🖨️ 인쇄하기</button>
+        <button className="guide-pdf-btn" onClick={handlePdfSave} disabled={isPdfSaving}>
+          {isPdfSaving ? '⏳ 저장 중...' : '📄 PDF 저장'}
+        </button>
+        <button className="guide-kakao-btn" onClick={handleKakaoShare} disabled={isSharing}>
+          {isSharing ? '⏳ 공유 중...' : '💬 카카오톡 보내기'}
+        </button>
       </div>
 
-      <div className="guide-doc">
+      <div className="guide-doc" id="guide-doc-content">
         {/* 문서 헤더 */}
         <div className="guide-doc-header">
           <div className="hospital-logo-area">
