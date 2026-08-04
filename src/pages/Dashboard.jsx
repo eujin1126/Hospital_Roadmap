@@ -1,10 +1,13 @@
-import { weeklyAppointments, hourlyDistribution, monthlyPatients, departmentStats, todayAppointments } from '../data/mockData';
+import { useData } from '../context/DataContext';
+import { weeklyAppointments, hourlyDistribution, monthlyPatients, departmentStats } from '../data/mockData';
 import './Dashboard.css';
 
 function Dashboard() {
+  const { todayAppointments } = useData();
+
   const todayStats = {
     totalAppointments: todayAppointments.length,
-    waiting: 6,
+    waiting: Math.max(0, todayAppointments.length - 2),
     pendingGuides: todayAppointments.filter(a => a.guideStatus === '미생성').length,
     printed: todayAppointments.filter(a => a.printStatus === '출력됨').length,
   };

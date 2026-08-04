@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { patients } from '../data/mockData';
+import { useData } from '../context/DataContext';
 import './PatientList.css';
 
 function PatientList() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('등록번호순');
   const navigate = useNavigate();
+  const { patients, todayAppointments, isLoading } = useData();
 
   const filteredPatients = patients.filter(p =>
     p.name.includes(searchTerm) ||
@@ -15,6 +16,14 @@ function PatientList() {
     p.department.includes(searchTerm) ||
     p.birthDate.includes(searchTerm)
   );
+
+  // 환자 ID로 해당 aptId 찾기
+  const getAptId = (patientId) => {
+    const apt = todayAppointments.find(a => a.patientId === patientId);
+    return apt ? apt.aptId : `APT-001`;
+  };
+
+  if (isLoading) return <div className="patient-list-page"><p>데이터 로딩 중...</p></div>;
 
   return (
     <div className="patient-list-page">
@@ -70,7 +79,7 @@ function PatientList() {
               <td>
                 <button
                   className="detail-btn"
-                  onClick={() => navigate(`/patient/APT-00${patients.indexOf(patient) + 1}`)}
+                  onClick={() => navigate(`/patient/${getAptId(patient.id)}`)}
                 >
                   상세
                 </button>

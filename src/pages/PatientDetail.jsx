@@ -1,10 +1,13 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { patientDetails } from '../data/mockData';
+import { useData } from '../context/DataContext';
 import './PatientDetail.css';
 
 function PatientDetail() {
   const { aptId } = useParams();
   const navigate = useNavigate();
+  const { patientDetails, isLoading } = useData();
+
+  if (isLoading) return <div className="patient-detail-page"><p>데이터 로딩 중...</p></div>;
 
   const detail = patientDetails[aptId];
 

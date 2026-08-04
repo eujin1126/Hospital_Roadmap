@@ -1,9 +1,12 @@
 import { useNavigate } from 'react-router-dom';
-import { todayAppointments } from '../data/mockData';
+import { useData } from '../context/DataContext';
 import './TodayAppointments.css';
 
 function TodayAppointments() {
   const navigate = useNavigate();
+  const { todayAppointments, isLoading } = useData();
+
+  if (isLoading) return <div className="today-page"><p>데이터 로딩 중...</p></div>;
 
   return (
     <div className="today-page">

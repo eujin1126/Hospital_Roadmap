@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { patientDetails, settings } from '../data/mockData';
+import { useData } from '../context/DataContext';
+import { settings } from '../data/mockData';
 import './AIGuideGenerate.css';
 
 // AI가 생성하는 안내문 데이터 (시뮬레이션)
@@ -92,6 +93,7 @@ function AIGuideGenerate() {
   const navigate = useNavigate();
   const [isGenerating, setIsGenerating] = useState(true);
   const [guideExams, setGuideExams] = useState([]);
+  const { patientDetails } = useData();
 
   const detail = patientDetails[aptId];
 

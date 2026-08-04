@@ -1,16 +1,19 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { todayAppointments } from '../data/mockData';
+import { useData } from '../context/DataContext';
 import './GuideManagement.css';
 
 function GuideManagement() {
   const [activeTab, setActiveTab] = useState('completed');
   const navigate = useNavigate();
+  const { todayAppointments, isLoading } = useData();
 
   const completedGuides = todayAppointments.filter(a => a.guideStatus === '확정됨');
   const pendingGuides = todayAppointments.filter(a => a.guideStatus === '확인 필요' || a.guideStatus === '미생성');
 
   const currentList = activeTab === 'completed' ? completedGuides : pendingGuides;
+
+  if (isLoading) return <div className="guide-page"><p>데이터 로딩 중...</p></div>;
 
   return (
     <div className="guide-page">
