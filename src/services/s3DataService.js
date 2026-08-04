@@ -33,7 +33,7 @@ export function transformPatientData(rawData) {
         fullName: row.name,
         birthDate: extractBirthDate(row.rrn),
         gender: row.gender === 'F' ? '여' : '남',
-        phone: row.phone || '-',
+        phone: row.number || row.phone || '-',
         department: row.department,
         lastVisit: `${row.visitDate} ${normalizeTime(row.time)}`.trim(),
         age: parseInt(row.age) || 0,
@@ -64,7 +64,7 @@ export function transformPatientData(rawData) {
         age: parseInt(row.age) || 0,
         gender: row.gender === 'F' ? '여' : '남',
         visitDate: row.visitDate,
-        phone: row.phone || '-',
+        phone: row.number || row.phone || '-',
         note: row.note || '',
       });
     }
