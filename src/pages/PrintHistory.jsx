@@ -10,38 +10,42 @@ function PrintHistory() {
   const navigate = useNavigate();
   const { allAppointments, isLoading } = useData();
 
-  // 필터 상태
+  const [activeTab, setActiveTab] = useState('printed');
   const [filterDate, setFilterDate] = useState('');
   const [filterDept, setFilterDept] = useState('');
   const [filterTimeFrom, setFilterTimeFrom] = useState('');
   const [filterTimeTo, setFilterTimeTo] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
 
-  // 출력 완료 환자만
   const printedList = allAppointments.filter(a => a.printStatus === '출력');
+  const notPrintedList = allAppointments.filter(a => a.printStatus !== '출력');
 
-  // 진료과 목록
   const departments = useMemo(() => {
     const depts = [...new Set(allAppointments.map(a => a.department).filter(Boolean))];
     return depts.sort();
   }, [allAppointments]);
 
-  // 필터 적용
+  const baseList = activeTab === 'printed' ? printedList : notPrintedList;
+
   const filteredList = useMemo(() => {
-    let list = printedList;
+    let list = baseList;
     if (filterDate) list = list.filter(a => a.visitDate === filterDate);
     if (filterDept) list = list.filter(a => a.department === filterDept);
     if (filterTimeFrom) list = list.filter(a => a.time >= filterTimeFrom);
     if (filterTimeTo) list = list.filter(a => a.time <= filterTimeTo);
     return list;
-  }, [printedList, filterDate, filterDept, filterTimeFrom, filterTimeTo]);
+  }, [baseList, filterDate, filterDept, filterTimeFrom, filterTimeTo]);
 
-  // 페이지네이션
   const totalPages = Math.ceil(filteredList.length / ITEMS_PER_PAGE);
   const paginatedList = filteredList.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    setCurrentPage(1);
+  };
 
   const handleResetFilters = () => {
     setFilterDate('');
@@ -54,8 +58,23 @@ function PrintHistory() {
   if (isLoading) return <div className="print-history-page"><p>데이터 로딩 중...</p></div>;
 
   return (
-    <div className="print-history-page">
+    <div className="print-history-page guide-page">
       <h1 className="page-title">출력 이력</h1>
+
+      <div className="guide-tabs">
+        <button
+          className={`guide-tab ${activeTab === 'printed' ? 'active' : ''}`}
+          onClick={() => handleTabChange('printed')}
+        >
+          출력 완료 ({printedList.length})
+        </button>
+        <button
+          className={`guide-tab ${activeTab === 'notPrinted' ? 'active' : ''}`}
+          onClick={() => handleTabChange('notPrinted')}
+        >
+          출력 미진행 ({notPrintedList.length})
+        </button>
+      </div>
 
       {/* 필터 */}
       <div className="guide-filters">
@@ -104,7 +123,7 @@ function PrintHistory() {
             <button className="filter-btn reset" onClick={handleResetFilters}>초기화</button>
           </div>
         </div>
-        <p className="filter-result-count">출력 완료: {filteredList.length}건</p>
+        <p className="filter-result-count">검색 결과: {filteredList.length}건</p>
       </div>
 
       <table className="guide-table">
@@ -124,7 +143,7 @@ function PrintHistory() {
           {paginatedList.length === 0 && (
             <tr>
               <td colSpan="8" style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>
-                출력 완료된 안내문이 없습니다.
+                {activeTab === 'printed' ? '출력 완료된 안내문이 없습니다.' : '미출력 안내문이 없습니다.'}
               </td>
             </tr>
           )}
@@ -137,14 +156,16 @@ function PrintHistory() {
               <td className="dept-text">{item.department}</td>
               <td>{item.examCount}건</td>
               <td>
-                <span className="status-badge confirmed">출력</span>
+                <span className={`status-badge ${item.printStatus === '출력' ? 'confirmed' : 'pending'}`}>
+                  {item.printStatus === '출력' ? '출력' : '미출력'}
+                </span>
               </td>
               <td>
                 <button
                   className="view-btn"
                   onClick={() => navigate(`/ai-guide/${item.aptId}`)}
                 >
-                  재출력
+                  {activeTab === 'printed' ? '재출력' : '안내문 생성'}
                 </button>
               </td>
             </tr>
@@ -152,7 +173,6 @@ function PrintHistory() {
         </tbody>
       </table>
 
-      {/* 페이지네이션 */}
       {totalPages > 1 && (
         <div className="pagination">
           <button className="page-btn" disabled={currentPage === 1} onClick={() => setCurrentPage(currentPage - 1)}>

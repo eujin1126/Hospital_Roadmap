@@ -29,6 +29,7 @@ function Sidebar() {
 
   const menuItems = [
     { path: '/dashboard', label: '대시보드' },
+    { path: '/data-management', label: '데이터 관리' },
     { type: 'divider' },
     { path: '/patients', label: '전체 환자 목록' },
     { path: '/calendar', label: '예약 캘린더' },

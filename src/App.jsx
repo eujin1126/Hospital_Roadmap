@@ -13,6 +13,7 @@ import PatientDetail from './pages/PatientDetail';
 import AIGuideGenerate from './pages/AIGuideGenerate';
 import PublicGuide from './pages/PublicGuide';
 import RedirectWay from './pages/RedirectWay';
+import DataManagement from './pages/DataManagement';
 
 function ProtectedRoute({ children }) {
   const { user } = useAuth();
@@ -36,6 +37,7 @@ function AppRoutes() {
       }>
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />
+        <Route path="data-management" element={<DataManagement />} />
         <Route path="patients" element={<PatientList />} />
         <Route path="calendar" element={<Calendar />} />
         <Route path="guides" element={<GuideManagement />} />
