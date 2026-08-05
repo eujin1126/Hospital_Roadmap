@@ -5,6 +5,7 @@ import { settings } from '../data/mockData';
 import { generatePDF, downloadPDF, pdfToBlob, uploadPDFToS3, getPresignedDownloadUrl } from '../services/pdfService';
 import { initKakao, shareViaKakao } from '../services/kakaoService';
 import { predictExamLocation } from '../services/bedrockService';
+import FloorMapOverlay from '../components/FloorMapOverlay';
 import './AIGuideGenerate.css';
 
 // AI가 생성하는 안내문 데이터 (시뮬레이션)
@@ -308,44 +309,19 @@ function AIGuideGenerate() {
               </div>
             )}
 
-            {/* 안내도 */}
-            <div className="guide-map-container">
-              <div style={{ textAlign: 'center', marginBottom: '12px' }}>
-                <span className="guide-map-title">{exam.guideInfo.floor} 안내도</span>
-              </div>
-              {exam.floorMapImage ? (
-                <img
-                  src={exam.floorMapImage}
-                  alt={`${exam.guideInfo.floor} 층별 안내도`}
-                  className="guide-floor-map-img"
-                  crossOrigin="anonymous"
-                />
-              ) : (
-                <div className="guide-map-flow">
-                  {exam.guideInfo.mapNodes.map((node, i) => (
-                    <span key={i} style={{ display: 'contents' }}>
-                      <div className={`guide-map-node ${node.type}`}>
-                        {node.label.split('\n').map((line, li) => (
-                          <span key={li}>{line}{li < node.label.split('\n').length - 1 && <br/>}</span>
-                        ))}
-                      </div>
-                      {i < exam.guideInfo.mapNodes.length - 1 && (
-                        <span className="guide-map-arrow">- - - →</span>
-                      )}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
+            {/* 안내도 - Rekognition 기반 하이라이트 */}
+            <FloorMapOverlay location={exam.location} examName={exam.name} />
 
-            {/* 이동 안내 */}
-            <div className="guide-direction">
-              <span className="guide-direction-icon">🚶</span>
-              <strong>이동 안내: </strong>
-              {exam.guideInfo.direction.split('\n').map((line, i) => (
-                <span key={i}>{line}{i < exam.guideInfo.direction.split('\n').length - 1 && <br/>}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-              ))}
-            </div>
+            {/* 층 이동 안내 (층 이동이 있는 경우) */}
+            {exam.guideInfo.direction && (
+              <div className="guide-direction">
+                <span className="guide-direction-icon">🚶</span>
+                <strong>이동 안내: </strong>
+                {exam.guideInfo.direction.split('\n').map((line, i) => (
+                  <span key={i}>{line}{i < exam.guideInfo.direction.split('\n').length - 1 && <br/>}</span>
+                ))}
+              </div>
+            )}
           </div>
         ))}
 
