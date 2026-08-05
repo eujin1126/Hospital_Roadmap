@@ -2,11 +2,14 @@ import * as XLSX from 'xlsx';
 
 const S3_URL = 'https://hospital-demo-data-6zo.s3.us-east-1.amazonaws.com/patient.csv';
 
-// S3에서 CSV 파일을 가져와 JSON으로 변환
+// S3에서 CSV 파일을 가져와 JSON으로 변환 (EUC-KR 인코딩 처리)
 export async function fetchPatientData() {
   const response = await fetch(S3_URL);
   if (!response.ok) throw new Error(`S3 fetch failed: ${response.status}`);
-  const text = await response.text();
+  const arrayBuffer = await response.arrayBuffer();
+  // EUC-KR(CP949)로 디코딩
+  const decoder = new TextDecoder('euc-kr');
+  const text = decoder.decode(arrayBuffer);
   // CSV를 XLSX로 파싱
   const workbook = XLSX.read(text, { type: 'string' });
   const sheetName = workbook.SheetNames[0];
