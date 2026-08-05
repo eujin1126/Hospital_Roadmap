@@ -237,13 +237,28 @@ function extractBirthDate(rrn) {
   return `${year}-${month}-${day}`;
 }
 
-// 시간 정규화: "9:00:00 AM" → "9:00", "2:30:00 PM" → "14:30"
+// 시간 정규화: "9:00:00 AM" → "9:00", "2:30:00 PM" → "14:30", "오전 9:00:00" → "9:00"
 function normalizeTime(timeVal) {
   if (!timeVal) return '';
   const str = String(timeVal).trim();
   
   // 이미 HH:MM 24시간 형식인 경우 (초 없이)
   if (/^\d{1,2}:\d{2}$/.test(str)) return str;
+
+  // 한국어 오전/오후 형식 처리: "오전 9:00:00", "오후 2:30:00"
+  const korMatch = str.match(/^(오전|오후)\s*(\d{1,2}):(\d{2})(?::\d{2})?$/);
+  if (korMatch) {
+    let hours = parseInt(korMatch[2]);
+    const minutes = korMatch[3];
+    const period = korMatch[1];
+    
+    if (period === '오후' && hours !== 12) {
+      hours += 12;
+    } else if (period === '오전' && hours === 12) {
+      hours = 0;
+    }
+    return `${hours}:${minutes}`;
+  }
   
   // AM/PM 형식 처리
   const ampmMatch = str.match(/^(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM|am|pm)?$/i);
