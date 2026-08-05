@@ -3,19 +3,14 @@ import { useData } from '../context/DataContext';
 import './PatientDetail.css';
 
 // 의료 특이사항 배지 컴포넌트
-function MedicalBadge({ label, value, emptyText, critical }) {
+function MedicalBadge({ label, value }) {
   const isPositive = value && !['없음', 'N', 'false', '해당 없음', '불필요', ''].includes(value.trim());
-  const displayValue = value && value.trim() !== '' ? value : emptyText;
-  
+  const displayValue = value && value.trim() !== '' ? value : 'N';
+
   return (
-    <div className={`medical-badge-card ${isPositive ? (critical ? 'critical' : 'warning') : 'safe'}`}>
-      <div className="medical-badge-label">{label}</div>
-      <div className={`medical-badge-value ${isPositive ? (critical ? 'critical' : 'warning') : 'safe'}`}>
-        {isPositive && critical && <span className="medical-icon">⚠️</span>}
-        {isPositive && !critical && <span className="medical-icon">⚡</span>}
-        {!isPositive && <span className="medical-icon">✅</span>}
-        {displayValue}
-      </div>
+    <div className={`medical-badge ${isPositive ? 'active' : ''}`}>
+      <span className="medical-badge-label">{label}</span>
+      <span className={`medical-badge-value ${isPositive ? 'positive' : ''}`}>{displayValue}</span>
     </div>
   );
 }
@@ -122,26 +117,21 @@ function PatientDetail() {
         </div>
       </div>
 
-      {/* 환자 주의사항 및 특이사항 */}
+      {/* 주의사항 */}
       {medicalInfo && (
         <div className="pre-exam-section">
-          <h3 className="pre-exam-title">환자 주의사항 및 특이사항</h3>
+          <h3 className="pre-exam-title">주의사항</h3>
           <div className="medical-info-grid">
-            <MedicalBadge label="알레르기" value={medicalInfo.allergy} emptyText="알레르기 없음" critical={false} />
-            <MedicalBadge label="임신 여부" value={medicalInfo.pregnancyStatus} emptyText="해당 없음" critical={true} />
-            <MedicalBadge label="당뇨" value={medicalInfo.diabetes} emptyText="없음" critical={false} />
-            <MedicalBadge label="고혈압" value={medicalInfo.hypertension} emptyText="없음" critical={false} />
-            <MedicalBadge label="항응고제 복용" value={medicalInfo.anticoagulant} emptyText="없음" critical={true} />
-            <MedicalBadge label="심박조율기" value={medicalInfo.pacemaker} emptyText="없음" critical={true} />
-            <MedicalBadge label="금속 삽입물" value={medicalInfo.metalImplant} emptyText="없음" critical={true} />
-            <MedicalBadge label="휠체어 이용" value={medicalInfo.wheelchair} emptyText="불필요" critical={false} />
-            <MedicalBadge label="보호자 동반" value={medicalInfo.guardianRequired} emptyText="불필요" critical={true} />
+            <MedicalBadge label="알레르기" value={medicalInfo.allergy} />
+            <MedicalBadge label="임신 여부" value={medicalInfo.pregnancyStatus} />
+            <MedicalBadge label="당뇨" value={medicalInfo.diabetes} />
+            <MedicalBadge label="고혈압" value={medicalInfo.hypertension} />
+            <MedicalBadge label="항응고제 복용" value={medicalInfo.anticoagulant} />
+            <MedicalBadge label="심박조율기" value={medicalInfo.pacemaker} />
+            <MedicalBadge label="금속 삽입물" value={medicalInfo.metalImplant} />
+            <MedicalBadge label="휠체어 이용" value={medicalInfo.wheelchair} />
+            <MedicalBadge label="보호자 동반" value={medicalInfo.guardianRequired} />
           </div>
-          {medicalInfo.patientNote && (
-            <div className="patient-note-box">
-              <strong>환자 메모:</strong> {medicalInfo.patientNote}
-            </div>
-          )}
         </div>
       )}
 
