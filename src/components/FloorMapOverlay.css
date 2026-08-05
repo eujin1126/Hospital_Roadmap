@@ -2,6 +2,27 @@
   margin: 12px 0;
 }
 
+.floor-map-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.floor-map-floor-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #4f8cff;
+  background: #dbeafe;
+  padding: 3px 10px;
+  border-radius: 10px;
+}
+
+.floor-map-location-text {
+  font-size: 12px;
+  color: #64748b;
+}
+
 .map-loading {
   font-size: 13px;
   color: #94a3b8;
