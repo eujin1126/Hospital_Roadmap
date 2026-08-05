@@ -29,11 +29,12 @@ function Sidebar() {
 
   const menuItems = [
     { path: '/dashboard', label: '대시보드' },
+    { type: 'divider' },
     { path: '/patients', label: '전체 환자 목록' },
     { path: '/calendar', label: '예약 캘린더' },
+    { type: 'divider' },
     { path: '/guides', label: '안내문 관리' },
     { path: '/print-history', label: '출력 이력' },
-    { path: '/settings', label: '설정' },
   ];
 
   return (
@@ -56,15 +57,19 @@ function Sidebar() {
       </div>
 
       <nav className="sidebar-nav">
-        {menuItems.map(item => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-          >
-            {item.label}
-          </NavLink>
-        ))}
+        {menuItems.map((item, idx) =>
+          item.type === 'divider' ? (
+            <div key={`divider-${idx}`} className="nav-divider"></div>
+          ) : (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            >
+              {item.label}
+            </NavLink>
+          )
+        )}
       </nav>
 
       <div className="sidebar-footer">

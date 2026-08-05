@@ -88,7 +88,6 @@ function Calendar() {
   return (
     <div className="calendar-page">
       <h1 className="page-title">예약 캘린더</h1>
-      <p className="page-subtitle">날짜를 선택하면 해당 날짜의 예약 환자 목록을 확인할 수 있습니다.</p>
 
       <div className="calendar-combined-layout">
         {/* 왼쪽: 캘린더 */}

@@ -8,11 +8,14 @@ function Dashboard() {
 
   if (isLoading) return <div className="dashboard"><p>데이터 로딩 중...</p></div>;
 
+  const todayStr = new Date().toISOString().split('T')[0];
+  const nowTime = `${String(new Date().getHours()).padStart(2,'0')}:${String(new Date().getMinutes()).padStart(2,'0')}`;
+
   const todayStats = {
     totalAppointments: todayAppointments.length,
-    waiting: todayAppointments.filter(a => a.guideStatus === '미생성').length,
+    waiting: todayAppointments.filter(a => a.time && a.time > nowTime).length,
     pendingGuides: todayAppointments.filter(a => a.guideStatus === '미생성').length,
-    printed: todayAppointments.filter(a => a.printStatus === '출력됨').length,
+    printed: todayAppointments.filter(a => a.printStatus === '출력').length,
   };
 
   // 이번 주 예약 현황 계산
@@ -57,7 +60,6 @@ function Dashboard() {
   return (
     <div className="dashboard">
       <h1 className="page-title">대시보드</h1>
-      <p className="page-subtitle">오늘의 현황과 통계를 한눈에 확인할 수 있습니다.</p>
 
       <div className="stats-cards">
         <div className="stat-card clickable" onClick={() => navigate('/calendar')}>

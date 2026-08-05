@@ -28,7 +28,6 @@ function PatientList() {
   return (
     <div className="patient-list-page">
       <h1 className="page-title">전체 환자 목록</h1>
-      <p className="page-subtitle">등록된 전체 환자 인원</p>
 
       <div className="search-bar">
         <input

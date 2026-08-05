@@ -81,6 +81,12 @@
   padding: 0 8px;
 }
 
+.nav-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.15);
+  margin: 8px 8px;
+}
+
 .nav-item {
   padding: 12px 16px;
   border-radius: 8px;
