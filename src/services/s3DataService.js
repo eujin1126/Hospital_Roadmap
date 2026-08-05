@@ -89,15 +89,29 @@ export function transformPatientData(rawData) {
     // exam 필드를 → 또는 -> 구분자로 분리하여 각각 독립 검사로 추가
     const examStr = row.exam || row.examCode || '';
     const examItems = examStr.split(/\s*(?:→|->)\s*/).filter(e => e.trim() !== '');
+    
+    // location 필드도 동일 구분자로 분리 (검사별 위치 매핑)
+    const locationStr = row.location || '';
+    const locationItems = locationStr.split(/\s*(?:→|->)\s*/).filter(e => e.trim() !== '');
+
     if (examItems.length > 0) {
-      examItems.forEach(examName => {
-        const floorInfo = getExamFloorMapImage(examName.trim(), row.department);
+      examItems.forEach((examName, idx) => {
+        // CSV의 location이 있으면 우선 사용, 없으면 하드코딩 함수 사용
+        const csvLocation = locationItems[idx] ? locationItems[idx].trim() : '';
+        const finalLocation = csvLocation || getExamLocation(examName.trim());
+        
+        // 위치에서 층 정보 추출하여 안내도 이미지 결정
+        const floorFromLocation = extractFloorFromLocation(finalLocation);
+        const floorInfo = floorFromLocation
+          ? { floor: floorFromLocation, imageUrl: getFloorMapImageUrl(floorFromLocation) }
+          : getExamFloorMapImage(examName.trim(), row.department);
+        
         apt.exams.push({
           order: apt.exams.length + 1,
           name: examName.trim(),
           code: row.examCode || '',
           description: row.instruction || '',
-          location: getExamLocation(examName.trim()),
+          location: finalLocation,
           waitTime: getExamWaitTime(examName.trim()),
           floor: floorInfo.floor,
           floorMapImage: floorInfo.imageUrl,
@@ -334,6 +348,26 @@ function getExamWaitTime(examName) {
 
 // S3 이미지 베이스 URL
 const S3_MAP_BASE = 'https://hospital-demo-data-6zo.s3.us-east-1.amazonaws.com/maps';
+
+// 위치 문자열에서 층 코드 추출 (예: "2층 채혈실" → "2f", "지하1층 MRI실" → "b1")
+function extractFloorFromLocation(location) {
+  if (!location) return null;
+  const loc = location.trim();
+  
+  // 지하 층 매칭
+  const basementMatch = loc.match(/지하\s*(\d+)\s*층/);
+  if (basementMatch) return `b${basementMatch[1]}`;
+  
+  // 일반 층 매칭 (예: "2층", "1층")
+  const floorMatch = loc.match(/(\d+)\s*층/);
+  if (floorMatch) return `${floorMatch[1]}f`;
+  
+  // B1, 1F 등 영문 표기
+  const engMatch = loc.match(/\b(b\d+|\d+f)\b/i);
+  if (engMatch) return engMatch[1].toLowerCase();
+  
+  return null;
+}
 
 // 검사명 → 층 코드 매핑
 function getExamFloor(examName) {
