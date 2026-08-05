@@ -6,7 +6,7 @@ const S3_BASE = 'https://hospital-demo-data-6zo.s3.us-east-1.amazonaws.com/maps'
 function getFloorImageUrl(floorCode) {
   if (!floorCode) return null;
   const fileName = floorCode === 'b1' ? 'b1f.png' : `${floorCode}.png`;
-  return `${S3_BASE}/${fileName}`;
+  return `${S3_BASE}/${fileName}?v=${Date.now()}`;
 }
 
 function getFloorLabel(floorCode) {
