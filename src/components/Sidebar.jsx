@@ -32,7 +32,6 @@ function Sidebar() {
     { path: '/patients', label: '전체 환자 목록' },
     { path: '/calendar', label: '예약 캘린더' },
     { path: '/guides', label: '안내문 관리' },
-    { path: '/today', label: '오늘 예약 환자' },
     { path: '/print-history', label: '출력 이력' },
     { path: '/settings', label: '설정' },
   ];

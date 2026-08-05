@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useData } from '../context/DataContext';
 import './Calendar.css';
 
 function Calendar() {
-  const { calendarData, appointmentsByDate, isLoading } = useData();
+  const { calendarData, allAppointments, isLoading } = useData();
+  const navigate = useNavigate();
   const [currentDate, setCurrentDate] = useState(new Date(2026, 7, 1)); // 2026년 8월
   const [selectedDay, setSelectedDay] = useState(null);
 
@@ -35,8 +37,11 @@ function Calendar() {
     return calendarData[getDateStr(day)] || 0;
   };
 
+  // 선택한 날짜의 예약 환자 목록
   const selectedDateStr = selectedDay ? getDateStr(selectedDay) : null;
-  const selectedAppointments = selectedDateStr ? (appointmentsByDate[selectedDateStr] || []) : [];
+  const selectedPatients = selectedDateStr
+    ? allAppointments.filter(a => a.visitDate === selectedDateStr)
+    : [];
 
   const formatSelectedDate = () => {
     if (!selectedDay) return '';
@@ -83,13 +88,15 @@ function Calendar() {
   return (
     <div className="calendar-page">
       <h1 className="page-title">예약 캘린더</h1>
+      <p className="page-subtitle">날짜를 선택하면 해당 날짜의 예약 환자 목록을 확인할 수 있습니다.</p>
 
-      <div className="calendar-layout">
-        <div className="calendar-left">
+      <div className="calendar-combined-layout">
+        {/* 왼쪽: 캘린더 */}
+        <div className="calendar-left-panel">
           <div className="calendar-header">
-            <button className="cal-nav-btn" onClick={prevMonth}>← 이전</button>
+            <button className="cal-nav-btn" onClick={prevMonth}>‹</button>
             <h2 className="cal-month-title">{year}년 {month + 1}월</h2>
-            <button className="cal-nav-btn" onClick={nextMonth}>다음 →</button>
+            <button className="cal-nav-btn" onClick={nextMonth}>›</button>
           </div>
 
           <div className="calendar-grid">
@@ -102,44 +109,64 @@ function Calendar() {
           </div>
         </div>
 
-        <div className="calendar-right">
-          <div className="appointment-panel">
-            <h3 className="panel-title">
-              {selectedDay ? formatSelectedDate() : '날짜를 선택하세요'}
+        {/* 오른쪽: 예약 환자 목록 */}
+        <div className="calendar-right-panel">
+          <div className="patient-list-header">
+            <h3 className="patient-list-title">
+              {selectedDay ? `${formatSelectedDate()} 예약 환자 ${selectedPatients.length}명` : '날짜를 선택하세요'}
             </h3>
-            {selectedDay && (
-              <p className="panel-count">
-                예약 {selectedAppointments.length}건
-              </p>
-            )}
-
-            <div className="appointment-list">
-              {!selectedDay && (
-                <div className="no-selection">
-                  <span className="no-selection-icon">📅</span>
-                  <p>캘린더에서 날짜를 클릭하면<br/>해당 날짜의 예약 목록이 표시됩니다.</p>
-                </div>
-              )}
-              {selectedDay && selectedAppointments.length === 0 && (
-                <div className="no-selection">
-                  <span className="no-selection-icon">📭</span>
-                  <p>해당 날짜에 예약된 환자가 없습니다.</p>
-                </div>
-              )}
-              {selectedAppointments.map((apt, idx) => (
-                <div key={idx} className="appointment-item">
-                  <div className="apt-time">{apt.time}</div>
-                  <div className="apt-info">
-                    <div className="apt-name">{apt.name}</div>
-                    <div className="apt-detail">{apt.department}</div>
-                  </div>
-                  <span className={`apt-status ${apt.status === '확정' ? 'confirmed' : 'waiting'}`}>
-                    {apt.status}
-                  </span>
-                </div>
-              ))}
-            </div>
           </div>
+
+          {!selectedDay && (
+            <div className="no-date-selected">
+              <span className="no-date-icon">📅</span>
+              <p>캘린더에서 날짜를 클릭하면<br/>해당 날짜의 예약 환자 목록이 표시됩니다.</p>
+            </div>
+          )}
+
+          {selectedDay && selectedPatients.length === 0 && (
+            <div className="no-date-selected">
+              <span className="no-date-icon">📭</span>
+              <p>해당 날짜에 예약된 환자가 없습니다.</p>
+            </div>
+          )}
+
+          {selectedDay && selectedPatients.length > 0 && (
+            <table className="cal-patient-table">
+              <thead>
+                <tr>
+                  <th>접수번호</th>
+                  <th>환자이름</th>
+                  <th>예약시간</th>
+                  <th>진료과</th>
+                  <th>검사수</th>
+                  <th>관리</th>
+                </tr>
+              </thead>
+              <tbody>
+                {selectedPatients.map(apt => (
+                  <tr key={apt.aptId}>
+                    <td>{apt.patientId}</td>
+                    <td>
+                      <div className="cal-patient-name">{apt.name}</div>
+                      <div className="cal-patient-sub">{apt.gender} / 만 {apt.age}세</div>
+                    </td>
+                    <td>{apt.time}</td>
+                    <td>{apt.department}</td>
+                    <td>{apt.examCount}건</td>
+                    <td>
+                      <button
+                        className="cal-detail-btn"
+                        onClick={() => navigate(`/patient/${apt.aptId}`)}
+                      >
+                        상세보기
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </div>

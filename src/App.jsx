@@ -7,7 +7,6 @@ import Dashboard from './pages/Dashboard';
 import PatientList from './pages/PatientList';
 import Calendar from './pages/Calendar';
 import GuideManagement from './pages/GuideManagement';
-import TodayAppointments from './pages/TodayAppointments';
 import PrintHistory from './pages/PrintHistory';
 import Settings from './pages/Settings';
 import PatientDetail from './pages/PatientDetail';
@@ -40,7 +39,6 @@ function AppRoutes() {
         <Route path="patients" element={<PatientList />} />
         <Route path="calendar" element={<Calendar />} />
         <Route path="guides" element={<GuideManagement />} />
-        <Route path="today" element={<TodayAppointments />} />
         <Route path="print-history" element={<PrintHistory />} />
         <Route path="settings" element={<Settings />} />
         <Route path="patient/:aptId" element={<PatientDetail />} />
