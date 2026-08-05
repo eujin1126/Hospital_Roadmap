@@ -9,8 +9,8 @@
 }
 
 .calendar-left-panel {
-  width: 420px;
-  flex-shrink: 0;
+  flex: 1;
+  min-width: 0;
   background: white;
   border-radius: 12px;
   border: 1px solid #e2e8f0;

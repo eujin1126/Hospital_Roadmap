@@ -29,6 +29,16 @@
   border: 1px solid #e2e8f0;
 }
 
+.stat-card.clickable {
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.stat-card.clickable:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transform: translateY(-2px);
+}
+
 .stat-label {
   font-size: 13px;
   color: #64748b;

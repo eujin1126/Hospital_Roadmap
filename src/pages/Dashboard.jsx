@@ -1,8 +1,10 @@
+import { useNavigate } from 'react-router-dom';
 import { useData } from '../context/DataContext';
 import './Dashboard.css';
 
 function Dashboard() {
   const { todayAppointments, allAppointments, departmentStats, calendarData, isLoading } = useData();
+  const navigate = useNavigate();
 
   if (isLoading) return <div className="dashboard"><p>데이터 로딩 중...</p></div>;
 
@@ -58,7 +60,7 @@ function Dashboard() {
       <p className="page-subtitle">오늘의 현황과 통계를 한눈에 확인할 수 있습니다.</p>
 
       <div className="stats-cards">
-        <div className="stat-card">
+        <div className="stat-card clickable" onClick={() => navigate('/calendar')}>
           <div className="stat-label">오늘 전체 예약</div>
           <div className="stat-value">{todayStats.totalAppointments}<span className="stat-unit">명</span></div>
         </div>
@@ -66,11 +68,11 @@ function Dashboard() {
           <div className="stat-label">대기 환자</div>
           <div className="stat-value">{todayStats.waiting}<span className="stat-unit">명</span></div>
         </div>
-        <div className="stat-card">
+        <div className="stat-card clickable" onClick={() => navigate('/guides')}>
           <div className="stat-label">안내문 미생성</div>
           <div className="stat-value">{todayStats.pendingGuides}<span className="stat-unit">건</span></div>
         </div>
-        <div className="stat-card">
+        <div className="stat-card clickable" onClick={() => navigate('/print-history')}>
           <div className="stat-label">출력 완료</div>
           <div className="stat-value">{todayStats.printed}<span className="stat-unit">건</span></div>
         </div>
