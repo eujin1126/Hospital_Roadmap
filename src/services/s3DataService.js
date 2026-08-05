@@ -83,6 +83,17 @@ export function transformPatientData(rawData) {
         visitDate: row.visitDate,
         phone: row.number || row.phone || '-',
         note: row.note || '',
+        // 의료 특이사항
+        allergy: row.allergy || '',
+        pregnancyStatus: row.pregnancyStatus || '',
+        diabetes: row.diabetes || '',
+        hypertension: row.hypertension || '',
+        anticoagulant: row.anticoagulant || '',
+        pacemaker: row.pacemaker || '',
+        metalImplant: row.metalImplant || '',
+        wheelchair: row.wheelchair || '',
+        guardianRequired: row.guardianRequired || '',
+        patientNote: row.patientNote || '',
       });
     }
     const apt = appointmentMap.get(row.reservationId);
@@ -90,9 +101,9 @@ export function transformPatientData(rawData) {
     const examStr = row.exam || row.examCode || '';
     const examItems = examStr.split(/\s*(?:→|->)\s*/).filter(e => e.trim() !== '');
     
-    // location 필드도 동일 구분자로 분리 (검사별 위치 매핑)
+    // location 필드도 동일 구분자로 분리 (검사별 위치 매핑) - →, ->, , 로 구분
     const locationStr = row.location || '';
-    const locationItems = locationStr.split(/\s*(?:→|->)\s*/).filter(e => e.trim() !== '');
+    const locationItems = locationStr.split(/\s*(?:→|->|,)\s*/).filter(e => e.trim() !== '');
 
     if (examItems.length > 0) {
       examItems.forEach((examName, idx) => {
@@ -193,6 +204,18 @@ export function transformPatientData(rawData) {
         others: { status: apt.note || '없음', detail: apt.exams.map(e => e.description).filter(Boolean).join(', ') || '' },
       },
       exams: apt.exams,
+      medicalInfo: {
+        allergy: apt.allergy,
+        pregnancyStatus: apt.pregnancyStatus,
+        diabetes: apt.diabetes,
+        hypertension: apt.hypertension,
+        anticoagulant: apt.anticoagulant,
+        pacemaker: apt.pacemaker,
+        metalImplant: apt.metalImplant,
+        wheelchair: apt.wheelchair,
+        guardianRequired: apt.guardianRequired,
+        patientNote: apt.patientNote,
+      },
     };
   });
 

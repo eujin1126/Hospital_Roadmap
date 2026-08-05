@@ -2,6 +2,24 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useData } from '../context/DataContext';
 import './PatientDetail.css';
 
+// 의료 특이사항 배지 컴포넌트
+function MedicalBadge({ label, value, emptyText, critical }) {
+  const isPositive = value && !['없음', 'N', 'false', '해당 없음', '불필요', ''].includes(value.trim());
+  const displayValue = value && value.trim() !== '' ? value : emptyText;
+  
+  return (
+    <div className={`medical-badge-card ${isPositive ? (critical ? 'critical' : 'warning') : 'safe'}`}>
+      <div className="medical-badge-label">{label}</div>
+      <div className={`medical-badge-value ${isPositive ? (critical ? 'critical' : 'warning') : 'safe'}`}>
+        {isPositive && critical && <span className="medical-icon">⚠️</span>}
+        {isPositive && !critical && <span className="medical-icon">⚡</span>}
+        {!isPositive && <span className="medical-icon">✅</span>}
+        {displayValue}
+      </div>
+    </div>
+  );
+}
+
 function PatientDetail() {
   const { aptId } = useParams();
   const navigate = useNavigate();
@@ -25,7 +43,7 @@ function PatientDetail() {
     );
   }
 
-  const { basicInfo, appointmentInfo, preExamChecks, exams } = detail;
+  const { basicInfo, appointmentInfo, preExamChecks, exams, medicalInfo } = detail;
 
   return (
     <div className="patient-detail-page">
@@ -104,46 +122,28 @@ function PatientDetail() {
         </div>
       </div>
 
-      <div className="pre-exam-section">
-        <h3 className="pre-exam-title">검사 전 확인사항</h3>
-        <div className="pre-exam-grid">
-          <div className="pre-exam-item">
-            <div className="pre-exam-label">금식 여부</div>
-            <span className={`pre-exam-status ${preExamChecks.fasting.status.includes('필요') ? 'required' : 'none'}`}>
-              {preExamChecks.fasting.status}
-            </span>
-            <span className="pre-exam-detail">{preExamChecks.fasting.detail}</span>
+      {/* 환자 주의사항 및 특이사항 */}
+      {medicalInfo && (
+        <div className="pre-exam-section">
+          <h3 className="pre-exam-title">환자 주의사항 및 특이사항</h3>
+          <div className="medical-info-grid">
+            <MedicalBadge label="알레르기" value={medicalInfo.allergy} emptyText="알레르기 없음" critical={false} />
+            <MedicalBadge label="임신 여부" value={medicalInfo.pregnancyStatus} emptyText="해당 없음" critical={true} />
+            <MedicalBadge label="당뇨" value={medicalInfo.diabetes} emptyText="없음" critical={false} />
+            <MedicalBadge label="고혈압" value={medicalInfo.hypertension} emptyText="없음" critical={false} />
+            <MedicalBadge label="항응고제 복용" value={medicalInfo.anticoagulant} emptyText="없음" critical={true} />
+            <MedicalBadge label="심박조율기" value={medicalInfo.pacemaker} emptyText="없음" critical={true} />
+            <MedicalBadge label="금속 삽입물" value={medicalInfo.metalImplant} emptyText="없음" critical={true} />
+            <MedicalBadge label="휠체어 이용" value={medicalInfo.wheelchair} emptyText="불필요" critical={false} />
+            <MedicalBadge label="보호자 동반" value={medicalInfo.guardianRequired} emptyText="불필요" critical={true} />
           </div>
-          <div className="pre-exam-item">
-            <div className="pre-exam-label">알레르기</div>
-            <span className={`pre-exam-status ${preExamChecks.allergy.status === '없음' ? 'none' : 'required'}`}>
-              {preExamChecks.allergy.status}
-            </span>
-            <span className="pre-exam-detail">{preExamChecks.allergy.detail}</span>
-          </div>
-          <div className="pre-exam-item">
-            <div className="pre-exam-label">조영제 사용</div>
-            <span className={`pre-exam-status ${preExamChecks.contrastAgent.status === '해당 없음' ? 'none' : 'required'}`}>
-              {preExamChecks.contrastAgent.status}
-            </span>
-            <span className="pre-exam-detail">{preExamChecks.contrastAgent.detail}</span>
-          </div>
-          <div className="pre-exam-item">
-            <div className="pre-exam-label">MRI 금속 여부</div>
-            <span className={`pre-exam-status ${preExamChecks.mriMetal.status === '해당 없음' ? 'none' : 'required'}`}>
-              {preExamChecks.mriMetal.status}
-            </span>
-            <span className="pre-exam-detail">{preExamChecks.mriMetal.detail}</span>
-          </div>
-          <div className="pre-exam-item">
-            <div className="pre-exam-label">기타 주의사항</div>
-            <span className={`pre-exam-status ${preExamChecks.others.status === '없음' ? 'none' : 'required'}`}>
-              {preExamChecks.others.status}
-            </span>
-            <span className="pre-exam-detail">{preExamChecks.others.detail}</span>
-          </div>
+          {medicalInfo.patientNote && (
+            <div className="patient-note-box">
+              <strong>환자 메모:</strong> {medicalInfo.patientNote}
+            </div>
+          )}
         </div>
-      </div>
+      )}
 
       <div className="exam-section">
         <h3 className="exam-section-title">검사 순서 (총 {exams.length}건)</h3>
