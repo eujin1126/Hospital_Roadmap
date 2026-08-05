@@ -2,14 +2,27 @@ import * as XLSX from 'xlsx';
 
 const S3_URL = 'https://hospital-demo-data-6zo.s3.us-east-1.amazonaws.com/patient.csv';
 
-// S3에서 CSV 파일을 가져와 JSON으로 변환 (EUC-KR 인코딩 처리)
+// S3에서 CSV 파일을 가져와 JSON으로 변환 (EUC-KR/UTF-8 자동 감지)
 export async function fetchPatientData() {
   const response = await fetch(S3_URL);
   if (!response.ok) throw new Error(`S3 fetch failed: ${response.status}`);
   const arrayBuffer = await response.arrayBuffer();
-  // EUC-KR(CP949)로 디코딩
-  const decoder = new TextDecoder('euc-kr');
-  const text = decoder.decode(arrayBuffer);
+  
+  // UTF-8로 먼저 시도, 깨지면 EUC-KR로 디코딩
+  let text;
+  const utf8Decoder = new TextDecoder('utf-8');
+  const utf8Text = utf8Decoder.decode(arrayBuffer);
+  
+  // UTF-8로 디코딩했을 때 깨진 문자(replacement character) 비율 체크
+  const brokenChars = (utf8Text.match(/\ufffd/g) || []).length;
+  if (brokenChars > 5) {
+    // EUC-KR로 재디코딩
+    const eucKrDecoder = new TextDecoder('euc-kr');
+    text = eucKrDecoder.decode(arrayBuffer);
+  } else {
+    text = utf8Text;
+  }
+
   // CSV를 XLSX로 파싱
   const workbook = XLSX.read(text, { type: 'string' });
   const sheetName = workbook.SheetNames[0];

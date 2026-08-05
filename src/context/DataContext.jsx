@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { fetchPatientData, transformPatientData } from '../services/s3DataService';
+import { syncGuideStatusToS3, syncPrintStatusToS3 } from '../services/s3SyncService';
 
 const DataContext = createContext(null);
 
@@ -66,22 +67,38 @@ export function DataProvider({ children }) {
     loadData();
   };
 
-  // 안내문 생성 완료 처리 (aptId 기준)
+  // 안내문 생성 완료 처리 (aptId 기준) + S3 동기화
   const markGuideGenerated = (aptId) => {
     if (!aptId) return;
     if (guideStatus[aptId] === '생성') return;
     const updated = { ...guideStatus, [aptId]: '생성' };
     setGuideStatus(updated);
     saveToStorage('guideStatus', updated);
+
+    // S3에 동기화 (reservationId 찾기)
+    const apt = data.allAppointments.find(a => a.aptId === aptId);
+    if (apt?.patientId) {
+      syncGuideStatusToS3(apt.patientId).then(success => {
+        if (success) console.log(`안내문 상태 S3 동기화 완료: ${apt.patientId}`);
+      });
+    }
   };
 
-  // 인쇄 완료 처리 (aptId 기준)
+  // 인쇄 완료 처리 (aptId 기준) + S3 동기화
   const markPrinted = (aptId) => {
     if (!aptId) return;
     if (printStatus[aptId] === '출력') return;
     const updated = { ...printStatus, [aptId]: '출력' };
     setPrintStatus(updated);
     saveToStorage('printStatus', updated);
+
+    // S3에 동기화 (reservationId 찾기)
+    const apt = data.allAppointments.find(a => a.aptId === aptId);
+    if (apt?.patientId) {
+      syncPrintStatusToS3(apt.patientId).then(success => {
+        if (success) console.log(`인쇄 상태 S3 동기화 완료: ${apt.patientId}`);
+      });
+    }
   };
 
   // 상태 가져오기 헬퍼 (localStorage 우선, 없으면 원본 데이터 참조)
