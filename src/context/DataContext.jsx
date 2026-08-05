@@ -84,9 +84,15 @@ export function DataProvider({ children }) {
     saveToStorage('printStatus', updated);
   };
 
-  // 상태 가져오기 헬퍼
-  const getGuideStatus = (aptId) => guideStatus[aptId] || '미생성';
-  const getPrintStatus = (aptId) => printStatus[aptId] || '미출력';
+  // 상태 가져오기 헬퍼 (localStorage 우선, 없으면 원본 데이터 참조)
+  const getGuideStatus = (aptId, originalStatus) => {
+    if (guideStatus[aptId]) return guideStatus[aptId];
+    return originalStatus || '미생성';
+  };
+  const getPrintStatus = (aptId, originalStatus) => {
+    if (printStatus[aptId]) return printStatus[aptId];
+    return originalStatus || '미출력';
+  };
 
   // 오늘 예약 환자 (날짜 기준 필터) + 상태 반영
   const today = new Date().toISOString().split('T')[0];
@@ -94,15 +100,15 @@ export function DataProvider({ children }) {
     .filter(a => a.visitDate === today)
     .map(a => ({
       ...a,
-      guideStatus: getGuideStatus(a.aptId),
-      printStatus: getPrintStatus(a.aptId),
+      guideStatus: getGuideStatus(a.aptId, a.guideStatus),
+      printStatus: getPrintStatus(a.aptId, a.printStatus),
     }));
 
   // allAppointments에도 상태 반영
   const allAppointmentsWithStatus = data.allAppointments.map(a => ({
     ...a,
-    guideStatus: getGuideStatus(a.aptId),
-    printStatus: getPrintStatus(a.aptId),
+    guideStatus: getGuideStatus(a.aptId, a.guideStatus),
+    printStatus: getPrintStatus(a.aptId, a.printStatus),
   }));
 
   return (

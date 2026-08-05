@@ -3,7 +3,7 @@ import * as XLSX from 'xlsx';
 import { useData } from '../context/DataContext';
 import './DataManagement.css';
 
-const S3_URL = 'https://hospital-demo-data-6zo.s3.us-east-1.amazonaws.com/patient.xlsx';
+const S3_URL = 'https://hospital-demo-data-6zo.s3.us-east-1.amazonaws.com/patient.csv';
 
 function DataManagement() {
   const { refreshData } = useData();

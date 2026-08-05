@@ -1,13 +1,14 @@
 import * as XLSX from 'xlsx';
 
-const S3_URL = 'https://hospital-demo-data-6zo.s3.us-east-1.amazonaws.com/patient.xlsx';
+const S3_URL = 'https://hospital-demo-data-6zo.s3.us-east-1.amazonaws.com/patient.csv';
 
-// S3에서 xlsx 파일을 가져와 JSON으로 변환
+// S3에서 CSV 파일을 가져와 JSON으로 변환
 export async function fetchPatientData() {
   const response = await fetch(S3_URL);
   if (!response.ok) throw new Error(`S3 fetch failed: ${response.status}`);
-  const arrayBuffer = await response.arrayBuffer();
-  const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+  const text = await response.text();
+  // CSV를 XLSX로 파싱
+  const workbook = XLSX.read(text, { type: 'string' });
   const sheetName = workbook.SheetNames[0];
   const worksheet = workbook.Sheets[sheetName];
   const rawData = XLSX.utils.sheet_to_json(worksheet, { raw: false });
@@ -59,8 +60,8 @@ export function transformPatientData(rawData) {
         department: row.department,
         examCount: 0,
         exams: [],
-        guideStatus: row.status === 'RESERVED' ? '미생성' : '확정됨',
-        printStatus: parseInt(row.checkedIn) === 1 ? '출력됨' : '미출력',
+        guideStatus: row.documentStatus === 'GENERATED' ? '생성' : '미생성',
+        printStatus: row.printStatus === 'PRINTED' ? '출력' : '미출력',
         age: parseInt(row.age) || 0,
         gender: row.gender === 'F' ? '여' : '남',
         visitDate: row.visitDate,
