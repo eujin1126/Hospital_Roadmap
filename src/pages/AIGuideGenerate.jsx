@@ -4,6 +4,7 @@ import { useData } from '../context/DataContext';
 import { settings } from '../data/mockData';
 import { generatePDF, downloadPDF, pdfToBlob, uploadPDFToS3, getPresignedDownloadUrl } from '../services/pdfService';
 import { initKakao, shareViaKakao } from '../services/kakaoService';
+import { predictExamLocation } from '../services/bedrockService';
 import './AIGuideGenerate.css';
 
 // AI가 생성하는 안내문 데이터 (시뮬레이션)
@@ -106,16 +107,44 @@ function AIGuideGenerate() {
   }, []);
 
   useEffect(() => {
-    // AI 생성 시뮬레이션 (2초 딜레이)
-    const timer = setTimeout(() => {
-      if (detail) {
-        setGuideExams(generateGuideData(detail));
-        // 안내문 생성 완료 상태 업데이트
-        markGuideGenerated(aptId);
+    // AI 안내문 생성 (location 없는 검사는 Bedrock AI로 추측)
+    async function generateGuide() {
+      if (!detail) {
+        setIsGenerating(false);
+        return;
       }
+
+      const guideData = generateGuideData(detail);
+      
+      // location이 없거나 fallback인 검사에 대해 AI 추측 시도
+      const enhanced = await Promise.all(
+        guideData.map(async (exam) => {
+          // floorMapImage가 없으면 AI에게 물어보기
+          if (!exam.floorMapImage && exam.name !== '검사') {
+            const prediction = await predictExamLocation(exam.name, detail.appointmentInfo?.department || '');
+            if (prediction && prediction.location) {
+              return {
+                ...exam,
+                location: prediction.location,
+                guideInfo: {
+                  ...exam.guideInfo,
+                  floor: prediction.floor || exam.guideInfo.floor,
+                  aiPredicted: true,
+                  confidence: prediction.confidence || 'medium',
+                },
+              };
+            }
+          }
+          return exam;
+        })
+      );
+
+      setGuideExams(enhanced);
+      markGuideGenerated(aptId);
       setIsGenerating(false);
-    }, 2000);
-    return () => clearTimeout(timer);
+    }
+
+    generateGuide();
   }, [aptId]);
 
   if (!detail) {
