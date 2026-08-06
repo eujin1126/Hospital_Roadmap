@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { extractFloorCode, extractTargetName } from '../services/pathfindingService';
+import { useAuth } from '../context/AuthContext';
 import './FloorMapOverlay.css';
 
 const S3_BASE = 'https://hospital-demo-data-6zo.s3.us-east-1.amazonaws.com/maps';
@@ -47,9 +48,18 @@ async function findLocationFromAI(floorCode, targetName) {
 function FloorMapOverlay({ location, examName }) {
   const [pinPosition, setPinPosition] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { hospitalInfo } = useAuth();
 
   const floorCode = extractFloorCode(location);
   const targetName = extractTargetName(location);
+
+  // 해당 층이 사용 가능한지 확인 (hospitalInfo 없으면 모든 층 허용)
+  const floorFileCode = floorCode === 'b1' ? 'b1f' : floorCode;
+  const mapsAvailable = hospitalInfo?.mapsAvailable;
+  if (mapsAvailable && !mapsAvailable.includes(floorFileCode)) {
+    return null;
+  }
+
   const imageUrl = getFloorImageUrl(floorCode);
 
   useEffect(() => {
