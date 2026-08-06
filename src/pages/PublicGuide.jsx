@@ -1,6 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { fetchPatientData, transformPatientData } from '../services/s3DataService';
+import FloorMapOverlay from '../components/FloorMapOverlay';
 import './AIGuideGenerate.css';
 
 // 검사별 안내 데이터 생성
@@ -134,6 +135,9 @@ function PublicGuide() {
               <span className="guide-direction-icon">🚶</span>
               <strong>이동 안내: </strong>{exam.guideInfo.direction}
             </div>
+
+            {/* 층별 안내도 */}
+            <FloorMapOverlay location={exam.location} examName={exam.name} />
           </div>
         ))}
 
