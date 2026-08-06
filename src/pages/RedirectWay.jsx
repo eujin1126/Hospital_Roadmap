@@ -1,8 +1,16 @@
 import { useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 function RedirectWay() {
+  const [searchParams] = useSearchParams();
+
   useEffect(() => {
-    window.location.href = 'https://mm80.github.io/way4/';
+    const reservationId = searchParams.get('reservationId');
+    if (reservationId) {
+      window.location.href = `https://mm80.github.io/wa1/?reservationId=${encodeURIComponent(reservationId)}`;
+    } else {
+      window.location.href = 'https://mm80.github.io/wa1/';
+    }
   }, []);
 
   return (
