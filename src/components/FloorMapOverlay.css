@@ -80,6 +80,15 @@
   z-index: 2;
 }
 
+.floor-map-pin {
+  position: absolute;
+  font-size: 28px;
+  transform: translate(-50%, -90%);
+  pointer-events: none;
+  z-index: 3;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
 .floor-map-no-path {
   position: absolute;
   top: 50%;
