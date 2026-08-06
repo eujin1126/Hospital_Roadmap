@@ -1,6 +1,6 @@
 // A* 알고리즘 기반 경로 탐색 서비스
 
-const AI_API_URL = 'https://6s6v23t2p0.execute-api.us-east-1.amazonaws.com/default/hospital-ai-location';
+const AI_API_URL = 'https://euh2dnu6ybhvo5kay6dof4h7ke0qrmzj.lambda-url.us-east-1.on.aws/';
 const S3_BASE = 'https://hospital-demo-data-6zo.s3.us-east-1.amazonaws.com';
 
 // 격자 맵 캐시

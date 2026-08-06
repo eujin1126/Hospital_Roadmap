@@ -1,6 +1,6 @@
 // Amazon Bedrock AI를 통한 검사 위치 추측 서비스
 
-const AI_API_URL = 'https://6s6v23t2p0.execute-api.us-east-1.amazonaws.com/default/hospital-ai-location';
+const AI_API_URL = 'https://euh2dnu6ybhvo5kay6dof4h7ke0qrmzj.lambda-url.us-east-1.on.aws/';
 
 // AI에게 검사 위치를 물어보기
 export async function predictExamLocation(examName, department) {
