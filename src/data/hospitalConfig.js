@@ -15,7 +15,7 @@ const hospitalConfig = {
     hospitalName: '건국대학교병원',
     csvFileName: 'patient2.csv',
     s3Bucket: 'hospital-demo-data-6zo',
-    mapsFolder: 'maps',
+    mapsFolder: 'map',
     mapsAvailable: ['b1f', '1f', '2f'],
     phone: '02-2030-5000',
     logo: '/konkuk-logo.svg',

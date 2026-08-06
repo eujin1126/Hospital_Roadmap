@@ -3,13 +3,13 @@ import { extractFloorCode, extractTargetName } from '../services/pathfindingServ
 import { useAuth } from '../context/AuthContext';
 import './FloorMapOverlay.css';
 
-const S3_BASE = 'https://hospital-demo-data-6zo.s3.us-east-1.amazonaws.com/maps';
+const S3_BASE = 'https://hospital-demo-data-6zo.s3.us-east-1.amazonaws.com';
 const AI_API_URL = 'https://euh2dnu6ybhvo5kay6dof4h7ke0qrmzj.lambda-url.us-east-1.on.aws/';
 
-function getFloorImageUrl(floorCode) {
+function getFloorImageUrl(floorCode, mapsFolder = 'maps') {
   if (!floorCode) return null;
   const fileName = floorCode === 'b1' ? 'b1f.png' : `${floorCode}.png`;
-  return `${S3_BASE}/${fileName}?v=${Date.now()}`;
+  return `${S3_BASE}/${mapsFolder}/${fileName}?v=${Date.now()}`;
 }
 
 function getFloorLabel(floorCode) {
@@ -60,7 +60,8 @@ function FloorMapOverlay({ location, examName }) {
     return null;
   }
 
-  const imageUrl = getFloorImageUrl(floorCode);
+  const mapsFolder = hospitalInfo?.mapsFolder || 'maps';
+  const imageUrl = getFloorImageUrl(floorCode, mapsFolder);
 
   useEffect(() => {
     async function loadPin() {

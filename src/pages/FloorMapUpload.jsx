@@ -74,7 +74,8 @@ function FloorMapUpload() {
     try {
       // 파일 확장자 결정
       const ext = selectedFile.type === 'application/pdf' ? 'pdf' : 'png';
-      const s3Key = `maps/${selectedFloor}.${ext}`;
+      const mapsFolder = hospitalInfo?.mapsFolder || 'maps';
+      const s3Key = `${mapsFolder}/${selectedFloor}.${ext}`;
       const s3Url = `${S3_BASE_URL}/${s3Key}`;
 
       const response = await fetch(s3Url, {
@@ -202,7 +203,7 @@ function FloorMapUpload() {
             }}>
               <p style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: '#374151' }}>{opt.label}</p>
               <img
-                src={`${S3_BASE_URL}/maps/${opt.value}.png?v=${Date.now()}`}
+                src={`${S3_BASE_URL}/${hospitalInfo?.mapsFolder || 'maps'}/${opt.value}.png?v=${Date.now()}`}
                 alt={`${opt.label} 안내도`}
                 style={{ width: '100%', height: '80px', objectFit: 'contain', borderRadius: '4px', background: '#f8fafc' }}
                 onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'block'; }}
