@@ -194,23 +194,34 @@ function FloorMapUpload() {
       <div className="data-section">
         <h2 className="data-section-title">현재 등록된 안내도</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
-          {FLOOR_OPTIONS.map(opt => (
-            <div key={opt.value} style={{
-              border: '1px solid #e2e8f0',
-              borderRadius: '8px',
-              padding: '12px',
-              textAlign: 'center',
-            }}>
-              <p style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: '#374151' }}>{opt.label}</p>
-              <img
-                src={`${S3_BASE_URL}/${hospitalInfo?.mapsFolder || 'maps'}/${opt.value}.png?v=${Date.now()}`}
-                alt={`${opt.label} 안내도`}
-                style={{ width: '100%', height: '80px', objectFit: 'contain', borderRadius: '4px', background: '#f8fafc' }}
-                onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'block'; }}
-              />
-              <p style={{ display: 'none', fontSize: '12px', color: '#94a3b8', marginTop: '8px' }}>미등록</p>
-            </div>
-          ))}
+          {FLOOR_OPTIONS.map(opt => {
+            const mapsFolder = hospitalInfo?.mapsFolder || 'maps';
+            const format = hospitalInfo?.mapFileNameFormat || 'lower';
+            let fileName;
+            if (format === 'upper') {
+              fileName = opt.value === 'b1f' ? 'B1.png' : `${opt.value.replace('f', '').toUpperCase()}F.png`;
+            } else {
+              fileName = `${opt.value}.png`;
+            }
+            const imgUrl = `${S3_BASE_URL}/${mapsFolder}/${fileName}?v=${Date.now()}`;
+            return (
+              <div key={opt.value} style={{
+                border: '1px solid #e2e8f0',
+                borderRadius: '8px',
+                padding: '12px',
+                textAlign: 'center',
+              }}>
+                <p style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px', color: '#374151' }}>{opt.label}</p>
+                <img
+                  src={imgUrl}
+                  alt={`${opt.label} 안내도`}
+                  style={{ width: '100%', height: '80px', objectFit: 'contain', borderRadius: '4px', background: '#f8fafc' }}
+                  onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'block'; }}
+                />
+                <p style={{ display: 'none', fontSize: '12px', color: '#94a3b8', marginTop: '8px' }}>미등록</p>
+              </div>
+            );
+          })}
         </div>
       </div>
 
