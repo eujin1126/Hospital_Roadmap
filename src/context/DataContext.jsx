@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { fetchPatientData, transformPatientData } from '../services/s3DataService';
 import { syncGuideStatusToS3, syncPrintStatusToS3 } from '../services/s3SyncService';
+import { useAuth } from './AuthContext';
 
 const DataContext = createContext(null);
 
@@ -23,6 +24,8 @@ function saveToStorage(key, value) {
 }
 
 export function DataProvider({ children }) {
+  const { hospitalInfo } = useAuth();
+
   const [data, setData] = useState({
     patients: [],
     allAppointments: [],
@@ -40,12 +43,15 @@ export function DataProvider({ children }) {
   const [printStatus, setPrintStatus] = useState(() => loadFromStorage('printStatus'));
 
   useEffect(() => {
-    loadData();
-  }, []);
+    if (hospitalInfo) {
+      loadData();
+    }
+  }, [hospitalInfo]);
 
   async function loadData() {
+    if (!hospitalInfo) return;
     try {
-      const rawData = await fetchPatientData();
+      const rawData = await fetchPatientData(hospitalInfo.csvFileName);
       const transformed = transformPatientData(rawData);
       setData({
         ...transformed,
@@ -77,8 +83,8 @@ export function DataProvider({ children }) {
 
     // S3에 동기화 (reservationId 찾기)
     const apt = data.allAppointments.find(a => a.aptId === aptId);
-    if (apt?.patientId) {
-      syncGuideStatusToS3(apt.patientId).then(success => {
+    if (apt?.patientId && hospitalInfo) {
+      syncGuideStatusToS3(apt.patientId, hospitalInfo.csvFileName).then(success => {
         if (success) console.log(`안내문 상태 S3 동기화 완료: ${apt.patientId}`);
       });
     }
@@ -94,8 +100,8 @@ export function DataProvider({ children }) {
 
     // S3에 동기화 (reservationId 찾기)
     const apt = data.allAppointments.find(a => a.aptId === aptId);
-    if (apt?.patientId) {
-      syncPrintStatusToS3(apt.patientId).then(success => {
+    if (apt?.patientId && hospitalInfo) {
+      syncPrintStatusToS3(apt.patientId, hospitalInfo.csvFileName).then(success => {
         if (success) console.log(`인쇄 상태 S3 동기화 완료: ${apt.patientId}`);
       });
     }

@@ -1,10 +1,11 @@
 import * as XLSX from 'xlsx';
 
-const S3_URL = 'https://hospital-demo-data-6zo.s3.us-east-1.amazonaws.com/patient.csv';
+const S3_BASE_URL = 'https://hospital-demo-data-6zo.s3.us-east-1.amazonaws.com';
 
 // S3에서 CSV 파일을 가져와 JSON으로 변환 (EUC-KR/UTF-8 자동 감지)
-export async function fetchPatientData() {
-  const response = await fetch(S3_URL);
+export async function fetchPatientData(csvFileName = 'patient.csv') {
+  const url = `${S3_BASE_URL}/${csvFileName}`;
+  const response = await fetch(url);
   if (!response.ok) throw new Error(`S3 fetch failed: ${response.status}`);
   const arrayBuffer = await response.arrayBuffer();
   

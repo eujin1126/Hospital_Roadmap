@@ -1,9 +1,8 @@
 import { useAuth } from '../context/AuthContext';
-import { settings } from '../data/mockData';
 import './Settings.css';
 
 function Settings() {
-  const { user } = useAuth();
+  const { user, hospitalInfo } = useAuth();
 
   return (
     <div className="settings-page">
@@ -39,7 +38,7 @@ function Settings() {
             <h3 className="settings-row-title">병원명</h3>
             <p className="settings-row-desc">안내문에 표시되는 병원 이름</p>
           </div>
-          <span className="settings-row-value">{settings.hospitalName}</span>
+          <span className="settings-row-value">{hospitalInfo?.hospitalName || '-'}</span>
         </div>
 
         <div className="settings-row">
@@ -47,7 +46,7 @@ function Settings() {
             <h3 className="settings-row-title">문의 전화번호</h3>
             <p className="settings-row-desc">안내문 하단에 표시되는 번호</p>
           </div>
-          <span className="settings-row-value">{settings.phone}</span>
+          <span className="settings-row-value">{hospitalInfo?.phone || '-'}</span>
         </div>
 
         <div className="settings-row">

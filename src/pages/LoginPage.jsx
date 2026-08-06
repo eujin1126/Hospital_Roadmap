@@ -61,7 +61,9 @@ function LoginPage() {
 
         <div className="login-test-info">
           <p className="test-title">테스트 계정</p>
-          <p className="test-detail">사번: EMP2024001 | 비밀번호: 아무 값 입력</p>
+          <p className="test-detail">강원대학교병원: EMP2024001</p>
+          <p className="test-detail">건국대학교병원: EMP2024002</p>
+          <p className="test-detail">비밀번호: 아무 값 입력</p>
         </div>
       </div>
     </div>

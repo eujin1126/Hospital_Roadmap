@@ -1,15 +1,17 @@
 import { createContext, useContext, useState } from 'react';
-import { currentUser } from '../data/mockData';
+import { getHospitalConfig, getAllEmployeeIds } from '../data/hospitalConfig';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [hospitalInfo, setHospitalInfo] = useState(null);
 
   const login = (employeeId, password) => {
-    // 테스트 계정: EMP2024001 / 아무 값
-    if (employeeId === 'EMP2024001') {
-      setUser(currentUser);
+    const config = getHospitalConfig(employeeId);
+    if (config) {
+      setUser({ employeeId });
+      setHospitalInfo(config);
       return true;
     }
     return false;
@@ -17,10 +19,11 @@ export function AuthProvider({ children }) {
 
   const logout = () => {
     setUser(null);
+    setHospitalInfo(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, hospitalInfo, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

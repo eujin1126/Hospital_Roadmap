@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useData } from '../context/DataContext';
-import { settings } from '../data/mockData';
+import { useAuth } from '../context/AuthContext';
 import { generatePDF, downloadPDF, pdfToBlob, uploadPDFToS3, getPresignedDownloadUrl } from '../services/pdfService';
 import { initKakao, shareViaKakao } from '../services/kakaoService';
 import { predictExamLocation } from '../services/bedrockService';
@@ -101,6 +101,7 @@ function AIGuideGenerate() {
   const [isPdfSaving, setIsPdfSaving] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
   const { patientDetails, markGuideGenerated, markPrinted } = useData();
+  const { hospitalInfo } = useAuth();
 
   const detail = patientDetails[aptId];
 
@@ -216,7 +217,7 @@ function AIGuideGenerate() {
 
       shareViaKakao({
         patientName: basicInfo.name,
-        hospitalName: settings.hospitalName,
+        hospitalName: hospitalInfo?.hospitalName || '병원',
         examDate: appointmentInfo.date,
         guideUrl,
         wayUrl,
@@ -329,7 +330,7 @@ function AIGuideGenerate() {
         {/* 문서 하단 */}
         <div className="guide-doc-footer">
           <div className="guide-footer-left">
-            <span>📞 문의: 원무과 (내선 1번) / {settings.phone}</span>
+            <span>📞 문의: 원무과 (내선 1번) / {hospitalInfo?.phone || ''}</span>
             <span>|</span>
             <span>담당의: {appointmentInfo.doctor}</span>
           </div>

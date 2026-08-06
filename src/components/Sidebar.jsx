@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import './Sidebar.css';
 
 function Sidebar() {
-  const { user, logout } = useAuth();
+  const { user, logout, hospitalInfo } = useAuth();
   const navigate = useNavigate();
   const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -75,10 +75,9 @@ function Sidebar() {
 
       <div className="sidebar-footer">
         <div className="user-info">
-          <div className="user-avatar">{user?.name?.charAt(0)}</div>
+          <div className="user-avatar">{user?.hospitalInfo?.hospitalName?.charAt(0) || '병'}</div>
           <div>
-            <div className="user-name">{user?.name}</div>
-            <div className="user-role">{user?.role}</div>
+            <div className="user-name">{hospitalInfo?.hospitalName || '병원길잡이'}</div>
           </div>
         </div>
         <button className="logout-btn" onClick={handleLogout}>로그아웃</button>

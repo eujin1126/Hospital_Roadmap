@@ -1,9 +1,10 @@
 import * as XLSX from 'xlsx';
 
-const S3_URL = 'https://hospital-demo-data-6zo.s3.us-east-1.amazonaws.com/patient.csv';
+const S3_BASE_URL = 'https://hospital-demo-data-6zo.s3.us-east-1.amazonaws.com';
 
-// S3의 patient.csv를 다운로드 → 특정 환자의 필드를 업데이트 → 다시 업로드
-export async function updatePatientFieldInS3(reservationId, updates) {
+// S3의 patient CSV를 다운로드 → 특정 환자의 필드를 업데이트 → 다시 업로드
+export async function updatePatientFieldInS3(reservationId, updates, csvFileName = 'patient.csv') {
+  const S3_URL = `${S3_BASE_URL}/${csvFileName}`;
   try {
     // 1. S3에서 CSV 다운로드
     const response = await fetch(S3_URL);
@@ -41,7 +42,7 @@ export async function updatePatientFieldInS3(reservationId, updates) {
     const utf8Bytes = encoder.encode(csvOutput);
 
     // 5. S3에 업로드
-    const uploadResponse = await fetch(S3_URL, {
+    const uploadResponse = await fetch(`${S3_BASE_URL}/${csvFileName}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'text/csv; charset=utf-8' },
       body: utf8Bytes,
@@ -60,23 +61,23 @@ export async function updatePatientFieldInS3(reservationId, updates) {
 }
 
 // 안내문 생성 상태를 S3에 동기화
-export async function syncGuideStatusToS3(reservationId) {
+export async function syncGuideStatusToS3(reservationId, csvFileName = 'patient.csv') {
   const now = new Date();
   const timestamp = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
   
   return updatePatientFieldInS3(reservationId, {
     documentStatus: 'GENERATED',
     documentCreatedAt: timestamp,
-  });
+  }, csvFileName);
 }
 
 // 인쇄 상태를 S3에 동기화
-export async function syncPrintStatusToS3(reservationId) {
+export async function syncPrintStatusToS3(reservationId, csvFileName = 'patient.csv') {
   const now = new Date();
   const timestamp = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
   
   return updatePatientFieldInS3(reservationId, {
     printStatus: 'PRINTED',
     printedAt: timestamp,
-  });
+  }, csvFileName);
 }
