@@ -1,4 +1,5 @@
-import { findLocationCoords } from '../data/floorCoords';
+import { useState, useEffect } from 'react';
+import { getFloorGrid, findPath, extractFloorCode, extractTargetName } from '../services/pathfindingService';
 import './FloorMapOverlay.css';
 
 const S3_BASE = 'https://hospital-demo-data-6zo.s3.us-east-1.amazonaws.com/maps';
@@ -15,24 +16,47 @@ function getFloorLabel(floorCode) {
 }
 
 function FloorMapOverlay({ location, examName }) {
-  if (!location) return null;
+  const [path, setPath] = useState(null);
+  const [gridData, setGridData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const coordsData = findLocationCoords(location);
-  
-  // 층 코드 추출 (좌표 찾기 실패해도 이미지는 보여주기 위함)
-  let floorCode = coordsData?.floorCode;
-  if (!floorCode) {
-    const basementMatch = location.match(/지하\s*(\d+)\s*층/);
-    if (basementMatch) floorCode = `b${basementMatch[1]}`;
-    const floorMatch = location.match(/(\d+)\s*층/);
-    if (floorMatch && !floorCode) floorCode = `${floorMatch[1]}f`;
+  const floorCode = extractFloorCode(location);
+  const targetName = extractTargetName(location);
+  const imageUrl = getFloorImageUrl(floorCode);
+
+  useEffect(() => {
+    async function loadAndFindPath() {
+      if (!floorCode || !targetName) {
+        setIsLoading(false);
+        return;
+      }
+
+      setIsLoading(true);
+      const data = await getFloorGrid(floorCode);
+      setGridData(data);
+
+      if (data) {
+        // 엘리베이터 → 목적지 경로 찾기
+        const foundPath = findPath(data, 'elevator', targetName);
+        setPath(foundPath);
+      }
+      setIsLoading(false);
+    }
+    loadAndFindPath();
+  }, [location]);
+
+  if (!floorCode || !imageUrl) return null;
+
+  if (isLoading) {
+    return (
+      <div className="floor-map-overlay-container">
+        <p className="map-loading">경로 분석 중...</p>
+      </div>
+    );
   }
 
-  const imageUrl = getFloorImageUrl(floorCode);
-  if (!imageUrl) return null;
-
-  const target = coordsData?.target;
-  const elevator = coordsData?.elevator;
+  const gridRows = gridData?.grid?.length || 12;
+  const gridCols = gridData?.grid?.[0]?.length || 12;
 
   return (
     <div className="floor-map-overlay-container">
@@ -44,57 +68,57 @@ function FloorMapOverlay({ location, examName }) {
         {/* 평면도 이미지 */}
         <img src={imageUrl} alt={`${getFloorLabel(floorCode)} 안내도`} className="floor-map-bg" crossOrigin="anonymous" />
 
-        {/* 회색 오버레이 (전체) */}
-        <div className="floor-map-gray-overlay"></div>
-
-        {/* 목적지 하이라이트 */}
-        {target && (
-          <div
-            className="floor-map-highlight"
-            style={{
-              left: `${target.x * 100}%`,
-              top: `${target.y * 100}%`,
-              width: `${target.width * 100}%`,
-              height: `${target.height * 100}%`,
-            }}
-          >
-            <div className="highlight-pin">📍</div>
-          </div>
-        )}
-
-        {/* 엘리베이터 → 목적지 경로 */}
-        {elevator && target && (
-          <svg className="floor-map-path" viewBox="0 0 100 100" preserveAspectRatio="none">
+        {/* 경로 오버레이 */}
+        {path && path.length > 1 && (
+          <svg className="floor-map-path" viewBox={`0 0 ${gridCols} ${gridRows}`} preserveAspectRatio="none">
             <defs>
-              <marker id={`arrow-${examName}`} markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-                <polygon points="0 0, 10 3.5, 0 7" fill="#4f8cff" />
+              <marker id={`pathArrow-${examName}`} markerWidth="4" markerHeight="3" refX="4" refY="1.5" orient="auto">
+                <polygon points="0 0, 4 1.5, 0 3" fill="#4f8cff" />
               </marker>
             </defs>
+            {/* 경로 점선 */}
+            <polyline
+              points={path.map(p => `${p.col + 0.5},${p.row + 0.5}`).join(' ')}
+              fill="none"
+              stroke="#4f8cff"
+              strokeWidth="0.3"
+              strokeDasharray="0.5 0.3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              markerEnd={`url(#pathArrow-${examName})`}
+            />
             {/* 출발점 (엘리베이터) */}
             <circle
-              cx={`${(elevator.x + elevator.width / 2) * 100}`}
-              cy={`${(elevator.y + elevator.height / 2) * 100}`}
-              r="1.5"
+              cx={path[0].col + 0.5}
+              cy={path[0].row + 0.5}
+              r="0.4"
               fill="#4f8cff"
             />
-            {/* 경로 점선 */}
-            <line
-              x1={`${(elevator.x + elevator.width / 2) * 100}`}
-              y1={`${(elevator.y + elevator.height / 2) * 100}`}
-              x2={`${(target.x + target.width / 2) * 100}`}
-              y2={`${(target.y + target.height / 2) * 100}`}
-              stroke="#4f8cff"
-              strokeWidth="0.5"
-              strokeDasharray="2 1"
-              markerEnd={`url(#arrow-${examName})`}
+            {/* 도착점 */}
+            <circle
+              cx={path[path.length - 1].col + 0.5}
+              cy={path[path.length - 1].row + 0.5}
+              r="0.4"
+              fill="#ef4444"
             />
           </svg>
+        )}
+
+        {/* 목적지 마커 (경로가 없어도 표시) */}
+        {!path && gridData?.legend && (
+          <div className="floor-map-no-path">
+            <span>📍</span>
+          </div>
         )}
       </div>
 
       {/* 이동 안내 */}
       <div className="floor-map-direction">
-        <span className="direction-step">🚶 엘리베이터에서 내린 후 <strong>{location}</strong>으로 이동하세요.</span>
+        {path ? (
+          <span className="direction-step">🚶 엘리베이터에서 내린 후 <strong>{location}</strong>까지 표시된 경로를 따라 이동하세요.</span>
+        ) : (
+          <span className="direction-step">🚶 엘리베이터에서 내린 후 <strong>{location}</strong>으로 이동하세요.</span>
+        )}
       </div>
     </div>
   );
