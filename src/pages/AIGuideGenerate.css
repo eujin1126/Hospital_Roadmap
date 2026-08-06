@@ -435,7 +435,27 @@
 
   @page {
     size: A4;
-    margin: 10mm;
+    margin: 15mm;
+  }
+
+  .guide-exam-card {
+    page-break-inside: avoid;
+    break-inside: avoid;
+    page-break-after: always;
+    break-after: page;
+  }
+
+  .guide-exam-card:last-child {
+    page-break-after: auto;
+    break-after: auto;
+  }
+
+  .guide-doc-header {
+    page-break-after: avoid;
+  }
+
+  .guide-patient-info {
+    page-break-after: avoid;
   }
 
   .ai-guide-page {
