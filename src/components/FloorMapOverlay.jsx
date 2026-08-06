@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { getFloorGrid, extractFloorCode, extractTargetName } from '../services/pathfindingService';
+import { extractFloorCode, extractTargetName } from '../services/pathfindingService';
 import './FloorMapOverlay.css';
 
 const S3_BASE = 'https://hospital-demo-data-6zo.s3.us-east-1.amazonaws.com/maps';
+const AI_API_URL = 'https://6s6v23t2p0.execute-api.us-east-1.amazonaws.com/default/hospital-ai-location';
 
 function getFloorImageUrl(floorCode) {
   if (!floorCode) return null;
@@ -15,65 +16,32 @@ function getFloorLabel(floorCode) {
   return `${floorCode.replace('f', '')}층`;
 }
 
-// 격자 맵에서 목적지 좌표 찾기
-function findTargetPosition(gridData, targetName) {
-  if (!gridData || !gridData.grid || !gridData.legend) return null;
+function getFloorImageKey(floorCode) {
+  if (!floorCode) return null;
+  const fileName = floorCode === 'b1' ? 'b1f.png' : `${floorCode}.png`;
+  return `maps/${fileName}`;
+}
 
-  const { grid, legend } = gridData;
-  const rows = grid.length;
-  const cols = grid[0]?.length || 0;
-  if (rows === 0 || cols === 0) return null;
+// Claude Vision에 직접 좌표 질문
+async function findLocationFromAI(floorCode, targetName) {
+  const floorImage = getFloorImageKey(floorCode);
+  if (!floorImage || !targetName) return null;
 
-  // legend에서 찾기 (값이 객체 또는 배열일 수 있음)
-  const getPos = (legendEntry) => {
-    if (!legendEntry) return null;
-    // 배열이면 첫 번째 요소 사용
-    if (Array.isArray(legendEntry)) {
-      if (legendEntry.length === 0) return null;
-      return legendEntry[0];
-    }
-    // 객체면 그대로
-    if (legendEntry.row !== undefined) return legendEntry;
+  try {
+    const response = await fetch(AI_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'findLocation', floorImage, targetName }),
+    });
+
+    if (!response.ok) return null;
+    const data = await response.json();
+    if (data.found) return { x: data.x, y: data.y };
     return null;
-  };
-
-  // legend에서 정확 매칭
-  if (legend[targetName]) {
-    const pos = getPos(legend[targetName]);
-    if (pos) return { x: (pos.col + 0.5) / cols, y: (pos.row + 0.5) / rows };
+  } catch (err) {
+    console.error('AI 위치 찾기 실패:', err);
+    return null;
   }
-
-  // legend에서 부분 매칭
-  for (const [key, val] of Object.entries(legend)) {
-    if (key.includes(targetName) || targetName.includes(key)) {
-      const pos = getPos(val);
-      if (pos) return { x: (pos.col + 0.5) / cols, y: (pos.row + 0.5) / rows };
-    }
-  }
-
-  // grid에서 직접 검색 (정확 매칭)
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      const cell = grid[r][c];
-      if (cell === targetName) {
-        return { x: (c + 0.5) / cols, y: (r + 0.5) / rows };
-      }
-    }
-  }
-
-  // grid에서 부분 매칭
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      const cell = grid[r][c];
-      if (cell !== 'wall' && cell !== 'corridor' && cell !== 'elevator' && cell !== 'entrance') {
-        if (cell.includes(targetName) || targetName.includes(cell)) {
-          return { x: (c + 0.5) / cols, y: (r + 0.5) / rows };
-        }
-      }
-    }
-  }
-
-  return null;
 }
 
 function FloorMapOverlay({ location, examName }) {
@@ -85,22 +53,18 @@ function FloorMapOverlay({ location, examName }) {
   const imageUrl = getFloorImageUrl(floorCode);
 
   useEffect(() => {
-    async function loadAndFindTarget() {
+    async function loadPin() {
       if (!floorCode || !targetName) {
         setIsLoading(false);
         return;
       }
 
       setIsLoading(true);
-      const data = await getFloorGrid(floorCode);
-
-      if (data) {
-        const pos = findTargetPosition(data, targetName);
-        setPinPosition(pos);
-      }
+      const pos = await findLocationFromAI(floorCode, targetName);
+      setPinPosition(pos);
       setIsLoading(false);
     }
-    loadAndFindTarget();
+    loadPin();
   }, [location]);
 
   if (!floorCode || !imageUrl) return null;
@@ -122,7 +86,6 @@ function FloorMapOverlay({ location, examName }) {
       <div className="floor-map-wrapper">
         <img src={imageUrl} alt={`${getFloorLabel(floorCode)} 안내도`} className="floor-map-bg" crossOrigin="anonymous" />
 
-        {/* 목적지 핀 */}
         {pinPosition && (
           <div
             className="floor-map-pin"
