@@ -211,8 +211,9 @@ function AIGuideGenerate() {
   const handleKakaoShare = async () => {
     setIsSharing(true);
     try {
-      // 로그인 없이 접근 가능한 공개 안내문 URL
-      const guideUrl = `${window.location.origin}/public-guide/${aptId}`;
+      // 로그인 없이 접근 가능한 공개 안내문 URL (병원 식별을 위해 csv 파라미터 포함)
+      const csvParam = encodeURIComponent(hospitalInfo?.csvFileName || 'patient.csv');
+      const guideUrl = `${window.location.origin}/public-guide/${aptId}?csv=${csvParam}`;
       const wayUrl = `${window.location.origin}/way`;
 
       shareViaKakao({

@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { fetchPatientData, transformPatientData } from '../services/s3DataService';
 import FloorMapOverlay from '../components/FloorMapOverlay';
@@ -27,6 +27,7 @@ const generateGuideData = (detail) => {
 
 function PublicGuide() {
   const { aptId } = useParams();
+  const [searchParams] = useSearchParams();
   const [detail, setDetail] = useState(null);
   const [guideExams, setGuideExams] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -36,17 +37,29 @@ function PublicGuide() {
     async function loadData() {
       setIsLoading(true);
       try {
-        // 모든 병원의 CSV 파일 시도
-        const hospitalEntries = Object.entries(hospitalConfig);
+        // URL에서 csv 파라미터 확인 (특정 병원 지정)
+        const csvParam = searchParams.get('csv');
+        
+        let csvToTry = [];
+        if (csvParam) {
+          // csv 파라미터가 있으면 해당 CSV만 시도
+          csvToTry = [csvParam];
+        } else {
+          // 없으면 모든 병원 CSV 시도
+          csvToTry = Object.values(hospitalConfig).map(c => c.csvFileName);
+        }
+
         let foundDetail = null;
 
-        for (const [empId, config] of hospitalEntries) {
+        for (const csv of csvToTry) {
           try {
-            const rawData = await fetchPatientData(config.csvFileName);
+            const rawData = await fetchPatientData(csv);
             const transformed = transformPatientData(rawData);
             if (transformed.patientDetails[aptId]) {
               foundDetail = transformed.patientDetails[aptId];
-              setHospitalInfo(config);
+              // 해당 CSV에 맞는 병원 설정 찾기
+              const matchedConfig = Object.values(hospitalConfig).find(c => c.csvFileName === csv);
+              if (matchedConfig) setHospitalInfo(matchedConfig);
               break;
             }
           } catch (e) {
