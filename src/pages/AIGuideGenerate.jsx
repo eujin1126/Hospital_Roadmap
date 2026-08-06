@@ -6,6 +6,7 @@ import { generatePDF, downloadPDF, pdfToBlob, uploadPDFToS3, getPresignedDownloa
 import { initKakao, shareViaKakao } from '../services/kakaoService';
 import { predictExamLocation } from '../services/bedrockService';
 import FloorMapOverlay from '../components/FloorMapOverlay';
+import QRCodeGenerator from '../components/QRCodeGenerator';
 import './AIGuideGenerate.css';
 
 // AI가 생성하는 안내문 데이터 (시뮬레이션)
@@ -332,9 +333,7 @@ function AIGuideGenerate() {
             <span>|</span>
             <span>담당의: {appointmentInfo.doctor}</span>
           </div>
-          <div className="guide-qr">
-            QR코드<br/>환자편에서<br/>스캔하세요
-          </div>
+          <QRCodeGenerator reservationId={basicInfo.registrationId} size={64} />
         </div>
       </div>
     </div>
