@@ -36,8 +36,11 @@ function FloorMapOverlay({ location, examName }) {
       setGridData(data);
 
       if (data) {
-        // 엘리베이터 → 목적지 경로 찾기
-        const foundPath = findPath(data, 'elevator', targetName);
+        // 엘리베이터 → 목적지 경로 찾기 (elevator 못 찾으면 entrance 시도)
+        let foundPath = findPath(data, 'elevator', targetName);
+        if (!foundPath) {
+          foundPath = findPath(data, 'entrance', targetName);
+        }
         setPath(foundPath);
       }
       setIsLoading(false);

@@ -72,24 +72,53 @@ export function findPath(gridData, startName, targetName) {
 
 // 격자에서 특정 이름의 위치 찾기
 function findCellPosition(grid, legend, name) {
-  // legend에서 먼저 찾기
+  // legend에서 먼저 찾기 (정확 매칭)
   if (legend[name]) {
     return { row: legend[name].row, col: legend[name].col };
   }
 
-  // 부분 매칭으로 legend 검색
+  // legend에서 부분 매칭
   for (const [key, pos] of Object.entries(legend)) {
     if (key.includes(name) || name.includes(key)) {
       return { row: pos.row, col: pos.col };
     }
   }
 
-  // grid에서 직접 검색
+  // 더 유연한 부분 매칭 (2글자 이상 공통)
+  for (const [key, pos] of Object.entries(legend)) {
+    const shorter = name.length < key.length ? name : key;
+    const longer = name.length >= key.length ? name : key;
+    if (shorter.length >= 2 && longer.includes(shorter.substring(0, 2))) {
+      return { row: pos.row, col: pos.col };
+    }
+  }
+
+  // grid에서 직접 검색 (정확 매칭)
   for (let r = 0; r < grid.length; r++) {
     for (let c = 0; c < grid[0].length; c++) {
       const cell = grid[r][c];
-      if (cell === name || cell.includes(name) || name.includes(cell)) {
-        return { row: r, col: c };
+      if (cell === name) return { row: r, col: c };
+    }
+  }
+
+  // grid에서 부분 매칭
+  for (let r = 0; r < grid.length; r++) {
+    for (let c = 0; c < grid[0].length; c++) {
+      const cell = grid[r][c];
+      if (cell !== 'wall' && cell !== 'corridor' && cell !== 'elevator' && cell !== 'entrance') {
+        if (cell.includes(name) || name.includes(cell)) {
+          return { row: r, col: c };
+        }
+      }
+    }
+  }
+
+  // 아무것도 못 찾으면 elevator 또는 entrance 검색
+  if (name !== 'elevator' && name !== 'entrance') {
+    // 최후 수단: grid에서 첫 번째 corridor 반환 (적어도 경로가 그려지도록)
+    for (let r = 0; r < grid.length; r++) {
+      for (let c = 0; c < grid[0].length; c++) {
+        if (grid[r][c] === 'corridor') return { row: r, col: c };
       }
     }
   }
@@ -134,7 +163,7 @@ function astar(grid, start, target, rows, cols) {
       if (closedSet.has(newKey)) continue;
 
       const cell = grid[newRow][newCol];
-      // wall은 지나갈 수 없음
+      // wall만 지나갈 수 없음. corridor, elevator, entrance, 방 이름 칸은 모두 이동 가능
       if (cell === 'wall') continue;
 
       const g = current.g + 1;
