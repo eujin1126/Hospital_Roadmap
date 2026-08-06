@@ -7,9 +7,9 @@ function RedirectWay() {
   useEffect(() => {
     const reservationId = searchParams.get('reservationId');
     if (reservationId) {
-      window.location.href = `https://mm80.github.io/wa1/?reservationId=${encodeURIComponent(reservationId)}`;
+      window.location.href = `http://hospital-demo-data-6zo.s3-website-us-east-1.amazonaws.com/?reservationId=${encodeURIComponent(reservationId)}`;
     } else {
-      window.location.href = 'https://mm80.github.io/wa1/';
+      window.location.href = 'http://hospital-demo-data-6zo.s3-website-us-east-1.amazonaws.com/';
     }
   }, []);
 

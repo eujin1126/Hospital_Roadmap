@@ -11,8 +11,8 @@ import { QRCodeSVG } from 'qrcode.react';
 function QRCodeGenerator({ reservationId, token, size = 100, className = '' }) {
   if (!reservationId) return null;
 
-  // QR 데이터: wa1 웹페이지 URL에 예약번호 포함
-  const qrData = `https://mm80.github.io/wa1/?reservationId=${encodeURIComponent(reservationId)}${token ? `&token=${encodeURIComponent(token)}` : ''}`;
+  // QR 데이터: 병원 가이드 웹페이지 URL에 예약번호 포함
+  const qrData = `http://hospital-demo-data-6zo.s3-website-us-east-1.amazonaws.com/?reservationId=${encodeURIComponent(reservationId)}${token ? `&token=${encodeURIComponent(token)}` : ''}`;
 
   return (
     <div className={`qr-code-container ${className}`}>
