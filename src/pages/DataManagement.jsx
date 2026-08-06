@@ -1,13 +1,17 @@
 import { useState, useRef } from 'react';
 import * as XLSX from 'xlsx';
 import { useData } from '../context/DataContext';
+import { useAuth } from '../context/AuthContext';
 import './DataManagement.css';
 
-const S3_URL = 'https://hospital-demo-data-6zo.s3.us-east-1.amazonaws.com/patient.csv';
+const S3_BASE_URL = 'https://hospital-demo-data-6zo.s3.us-east-1.amazonaws.com';
 
 function DataManagement() {
   const { refreshData } = useData();
+  const { hospitalInfo } = useAuth();
   const fileInputRef = useRef(null);
+  const csvFileName = hospitalInfo?.csvFileName || 'patient.csv';
+  const S3_URL = `${S3_BASE_URL}/${csvFileName}`;
 
   // 엑셀 업로드 상태
   const [uploadedFile, setUploadedFile] = useState(null);
@@ -98,11 +102,16 @@ function DataManagement() {
     setUploadSuccess('');
 
     try {
-      // S3에 PUT 요청 (퍼블릭 쓰기 권한 필요 또는 presigned URL)
+      // 엑셀 데이터를 CSV로 변환하여 S3에 업로드
+      const newWs = XLSX.utils.json_to_sheet(previewData);
+      const csvOutput = XLSX.utils.sheet_to_csv(newWs);
+      const encoder = new TextEncoder();
+      const csvBytes = encoder.encode(csvOutput);
+
       const response = await fetch(S3_URL, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' },
-        body: uploadedFile,
+        headers: { 'Content-Type': 'text/csv; charset=utf-8' },
+        body: csvBytes,
       });
 
       if (response.ok) {
@@ -171,7 +180,14 @@ function DataManagement() {
       // 기존 S3 데이터를 가져와서 새 행 추가 후 다시 업로드
       const response = await fetch(S3_URL);
       const arrayBuffer = await response.arrayBuffer();
-      const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+      
+      // EUC-KR/UTF-8 자동 감지
+      const utf8Decoder = new TextDecoder('utf-8');
+      const utf8Text = utf8Decoder.decode(arrayBuffer);
+      const brokenChars = (utf8Text.match(/\ufffd/g) || []).length;
+      const text = brokenChars > 5 ? new TextDecoder('euc-kr').decode(arrayBuffer) : utf8Text;
+
+      const workbook = XLSX.read(text, { type: 'string' });
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
       const existingData = XLSX.utils.sheet_to_json(worksheet, { raw: false });
@@ -179,18 +195,17 @@ function DataManagement() {
       // 새 환자 추가
       existingData.push(formData);
 
-      // 새 워크북 생성
+      // CSV로 변환
       const newWs = XLSX.utils.json_to_sheet(existingData);
-      const newWb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(newWb, newWs, 'Sheet1');
-      const wbout = XLSX.write(newWb, { bookType: 'xlsx', type: 'array' });
-      const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const csvOutput = XLSX.utils.sheet_to_csv(newWs);
+      const encoder = new TextEncoder();
+      const csvBytes = encoder.encode(csvOutput);
 
-      // S3 업로드
+      // S3 업로드 (CSV)
       const uploadRes = await fetch(S3_URL, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' },
-        body: blob,
+        headers: { 'Content-Type': 'text/csv; charset=utf-8' },
+        body: csvBytes,
       });
 
       if (uploadRes.ok) {
