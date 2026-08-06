@@ -24,25 +24,49 @@ function findTargetPosition(gridData, targetName) {
   const cols = grid[0]?.length || 0;
   if (rows === 0 || cols === 0) return null;
 
+  // legend에서 찾기 (값이 객체 또는 배열일 수 있음)
+  const getPos = (legendEntry) => {
+    if (!legendEntry) return null;
+    // 배열이면 첫 번째 요소 사용
+    if (Array.isArray(legendEntry)) {
+      if (legendEntry.length === 0) return null;
+      return legendEntry[0];
+    }
+    // 객체면 그대로
+    if (legendEntry.row !== undefined) return legendEntry;
+    return null;
+  };
+
   // legend에서 정확 매칭
   if (legend[targetName]) {
-    const pos = legend[targetName];
-    return { x: (pos.col + 0.5) / cols, y: (pos.row + 0.5) / rows };
+    const pos = getPos(legend[targetName]);
+    if (pos) return { x: (pos.col + 0.5) / cols, y: (pos.row + 0.5) / rows };
   }
 
   // legend에서 부분 매칭
-  for (const [key, pos] of Object.entries(legend)) {
+  for (const [key, val] of Object.entries(legend)) {
     if (key.includes(targetName) || targetName.includes(key)) {
-      return { x: (pos.col + 0.5) / cols, y: (pos.row + 0.5) / rows };
+      const pos = getPos(val);
+      if (pos) return { x: (pos.col + 0.5) / cols, y: (pos.row + 0.5) / rows };
     }
   }
 
-  // grid에서 직접 검색
+  // grid에서 직접 검색 (정확 매칭)
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       const cell = grid[r][c];
-      if (cell === targetName || cell.includes(targetName) || targetName.includes(cell)) {
-        if (cell !== 'wall' && cell !== 'corridor' && cell !== 'elevator' && cell !== 'entrance') {
+      if (cell === targetName) {
+        return { x: (c + 0.5) / cols, y: (r + 0.5) / rows };
+      }
+    }
+  }
+
+  // grid에서 부분 매칭
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const cell = grid[r][c];
+      if (cell !== 'wall' && cell !== 'corridor' && cell !== 'elevator' && cell !== 'entrance') {
+        if (cell.includes(targetName) || targetName.includes(cell)) {
           return { x: (c + 0.5) / cols, y: (r + 0.5) / rows };
         }
       }
