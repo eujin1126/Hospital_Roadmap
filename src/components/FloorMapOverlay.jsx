@@ -56,10 +56,11 @@ async function findLocationFromAI(floorCode, targetName) {
   }
 }
 
-function FloorMapOverlay({ location, examName }) {
+function FloorMapOverlay({ location, examName, hospitalInfoOverride }) {
   const [pinPosition, setPinPosition] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { hospitalInfo } = useAuth();
+  const { hospitalInfo: authHospitalInfo } = useAuth();
+  const hospitalInfo = hospitalInfoOverride || authHospitalInfo;
 
   const floorCode = extractFloorCode(location);
   const targetName = extractTargetName(location);

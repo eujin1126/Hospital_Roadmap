@@ -2,6 +2,7 @@ import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { fetchPatientData, transformPatientData } from '../services/s3DataService';
 import FloorMapOverlay from '../components/FloorMapOverlay';
+import hospitalConfig from '../data/hospitalConfig';
 import './AIGuideGenerate.css';
 
 // 검사별 안내 데이터 생성
@@ -29,21 +30,23 @@ function PublicGuide() {
   const [detail, setDetail] = useState(null);
   const [guideExams, setGuideExams] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [hospitalInfo, setHospitalInfo] = useState(null);
 
   useEffect(() => {
     async function loadData() {
       setIsLoading(true);
       try {
-        // 모든 CSV 파일 시도 (어떤 병원의 환자인지 모르므로)
-        const csvFiles = ['patient.csv', 'patient2.csv'];
+        // 모든 병원의 CSV 파일 시도
+        const hospitalEntries = Object.entries(hospitalConfig);
         let foundDetail = null;
 
-        for (const csv of csvFiles) {
+        for (const [empId, config] of hospitalEntries) {
           try {
-            const rawData = await fetchPatientData(csv);
+            const rawData = await fetchPatientData(config.csvFileName);
             const transformed = transformPatientData(rawData);
             if (transformed.patientDetails[aptId]) {
               foundDetail = transformed.patientDetails[aptId];
+              setHospitalInfo(config);
               break;
             }
           } catch (e) {
@@ -92,7 +95,8 @@ function PublicGuide() {
         {/* 문서 헤더 */}
         <div className="guide-doc-header" style={{ justifyContent: 'center' }}>
           <div className="hospital-logo-area">
-            <img src="/knuh-logo.svg" alt="병원" className="hospital-full-logo" />
+            <img src={hospitalInfo?.logo || '/knuh-logo.svg'} alt={hospitalInfo?.hospitalName || '병원'} className="hospital-full-logo" />
+            <span className="hospital-name-text">{hospitalInfo?.hospitalName || ''}</span>
           </div>
         </div>
         <div className="guide-doc-type-row">
@@ -132,7 +136,7 @@ function PublicGuide() {
             )}
 
             {/* 층별 안내도 */}
-            <FloorMapOverlay location={exam.location} examName={exam.name} />
+            <FloorMapOverlay location={exam.location} examName={exam.name} hospitalInfoOverride={hospitalInfo} />
           </div>
         ))}
 

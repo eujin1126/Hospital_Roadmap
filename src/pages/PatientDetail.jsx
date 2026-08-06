@@ -48,7 +48,7 @@ function PatientDetail() {
           <h1 className="page-title">환자 상세 정보</h1>
         </div>
         <button className="ai-guide-btn" onClick={() => navigate(`/ai-guide/${aptId}`)}>
-          ✨ AI 안내문 생성
+          ✨ 안내문 생성
         </button>
       </div>
 
