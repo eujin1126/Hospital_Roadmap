@@ -131,11 +131,6 @@ function PublicGuide() {
               </div>
             )}
 
-            <div className="guide-direction">
-              <span className="guide-direction-icon">🚶</span>
-              <strong>이동 안내: </strong>{exam.guideInfo.direction}
-            </div>
-
             {/* 층별 안내도 */}
             <FloorMapOverlay location={exam.location} examName={exam.name} />
           </div>

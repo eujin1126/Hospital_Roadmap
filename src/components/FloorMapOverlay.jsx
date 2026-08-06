@@ -98,10 +98,6 @@ function FloorMapOverlay({ location, examName }) {
           </div>
         )}
       </div>
-
-      <div className="floor-map-direction">
-        <span className="direction-step">🚶 엘리베이터에서 내린 후 <strong>{location}</strong>으로 이동하세요.</span>
-      </div>
     </div>
   );
 }

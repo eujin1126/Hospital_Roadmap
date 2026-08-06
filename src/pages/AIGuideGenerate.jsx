@@ -317,17 +317,6 @@ function AIGuideGenerate() {
 
             {/* 안내도 - Rekognition 기반 하이라이트 */}
             <FloorMapOverlay location={exam.location} examName={exam.name} />
-
-            {/* 층 이동 안내 (층 이동이 있는 경우) */}
-            {exam.guideInfo.direction && (
-              <div className="guide-direction">
-                <span className="guide-direction-icon">🚶</span>
-                <strong>이동 안내: </strong>
-                {exam.guideInfo.direction.split('\n').map((line, i) => (
-                  <span key={i}>{line}{i < exam.guideInfo.direction.split('\n').length - 1 && <br/>}</span>
-                ))}
-              </div>
-            )}
           </div>
         ))}
 
