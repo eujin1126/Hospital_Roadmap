@@ -6,9 +6,20 @@ import './FloorMapOverlay.css';
 const S3_BASE = 'https://hospital-demo-data-6zo.s3.us-east-1.amazonaws.com';
 const AI_API_URL = 'https://euh2dnu6ybhvo5kay6dof4h7ke0qrmzj.lambda-url.us-east-1.on.aws/';
 
-function getFloorImageUrl(floorCode, mapsFolder = 'maps') {
+function getFloorImageUrl(floorCode, mapsFolder = 'maps', fileNameFormat = 'lower') {
   if (!floorCode) return null;
-  const fileName = floorCode === 'b1' ? 'b1f.png' : `${floorCode}.png`;
+  let fileName;
+  if (fileNameFormat === 'upper') {
+    // 1F.png, 2F.png, B1.png
+    if (floorCode === 'b1') {
+      fileName = 'B1.png';
+    } else {
+      fileName = `${floorCode.replace('f', '').toUpperCase()}F.png`;
+    }
+  } else {
+    // 1f.png, b1f.png (기본)
+    fileName = floorCode === 'b1' ? 'b1f.png' : `${floorCode}.png`;
+  }
   return `${S3_BASE}/${mapsFolder}/${fileName}?v=${Date.now()}`;
 }
 
@@ -61,7 +72,8 @@ function FloorMapOverlay({ location, examName }) {
   }
 
   const mapsFolder = hospitalInfo?.mapsFolder || 'maps';
-  const imageUrl = getFloorImageUrl(floorCode, mapsFolder);
+  const fileNameFormat = hospitalInfo?.mapFileNameFormat || 'lower';
+  const imageUrl = getFloorImageUrl(floorCode, mapsFolder, fileNameFormat);
 
   useEffect(() => {
     async function loadPin() {

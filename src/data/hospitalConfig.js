@@ -17,6 +17,7 @@ const hospitalConfig = {
     s3Bucket: 'hospital-demo-data-6zo',
     mapsFolder: 'map',
     mapsAvailable: ['b1f', '1f', '2f'],
+    mapFileNameFormat: 'upper', // 'upper': 1F.png, B1.png / 'lower': 1f.png, b1f.png
     phone: '02-2030-5000',
     logo: '/konkuk-logo.svg',
   },
