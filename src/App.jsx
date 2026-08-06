@@ -14,6 +14,7 @@ import AIGuideGenerate from './pages/AIGuideGenerate';
 import PublicGuide from './pages/PublicGuide';
 import RedirectWay from './pages/RedirectWay';
 import DataManagement from './pages/DataManagement';
+import FloorMapUpload from './pages/FloorMapUpload';
 
 function ProtectedRoute({ children }) {
   const { user } = useAuth();
@@ -36,6 +37,7 @@ function ProtectedRoutes() {
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="data-management" element={<DataManagement />} />
+          <Route path="floor-map-upload" element={<FloorMapUpload />} />
           <Route path="patients" element={<PatientList />} />
           <Route path="calendar" element={<Calendar />} />
           <Route path="guides" element={<GuideManagement />} />
