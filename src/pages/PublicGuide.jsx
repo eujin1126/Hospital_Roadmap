@@ -1,10 +1,9 @@
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { useData } from '../context/DataContext';
-import { settings } from '../data/mockData';
+import { fetchPatientData, transformPatientData } from '../services/s3DataService';
 import './AIGuideGenerate.css';
 
-// 검사별 안내 데이터 생성 (AI 시뮬레이션)
+// 검사별 안내 데이터 생성
 const generateGuideData = (detail) => {
   if (!detail) return null;
   return detail.exams.map(exam => ({
@@ -26,26 +25,52 @@ const generateGuideData = (detail) => {
 
 function PublicGuide() {
   const { aptId } = useParams();
-  const { patientDetails, isLoading } = useData();
+  const [detail, setDetail] = useState(null);
   const [guideExams, setGuideExams] = useState([]);
-  const [isGenerating, setIsGenerating] = useState(true);
-
-  const detail = patientDetails[aptId];
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (detail) {
-        setGuideExams(generateGuideData(detail));
+    async function loadData() {
+      setIsLoading(true);
+      try {
+        // 모든 CSV 파일 시도 (어떤 병원의 환자인지 모르므로)
+        const csvFiles = ['patient.csv', 'patient2.csv'];
+        let foundDetail = null;
+
+        for (const csv of csvFiles) {
+          try {
+            const rawData = await fetchPatientData(csv);
+            const transformed = transformPatientData(rawData);
+            if (transformed.patientDetails[aptId]) {
+              foundDetail = transformed.patientDetails[aptId];
+              break;
+            }
+          } catch (e) {
+            continue;
+          }
+        }
+
+        if (foundDetail) {
+          setDetail(foundDetail);
+          setGuideExams(generateGuideData(foundDetail));
+        }
+      } catch (err) {
+        console.error('데이터 로드 실패:', err);
       }
-      setIsGenerating(false);
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, [aptId, detail]);
+      setIsLoading(false);
+    }
+    loadData();
+  }, [aptId]);
 
   if (isLoading) {
     return (
       <div className="ai-guide-page" style={{ margin: '0 auto', padding: '40px', maxWidth: '900px' }}>
-        <p>데이터 로딩 중...</p>
+        <div className="guide-doc">
+          <div className="generating-overlay">
+            <div className="generating-spinner"></div>
+            <p className="generating-text">검사 안내문을 불러오는 중...</p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -60,27 +85,16 @@ function PublicGuide() {
 
   const { basicInfo, appointmentInfo } = detail;
 
-  if (isGenerating) {
-    return (
-      <div className="ai-guide-page" style={{ margin: '0 auto', padding: '40px', maxWidth: '900px' }}>
-        <div className="guide-doc">
-          <div className="generating-overlay">
-            <div className="generating-spinner"></div>
-            <p className="generating-text">검사 안내문을 불러오는 중...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="ai-guide-page" style={{ margin: '0 auto', padding: '20px', maxWidth: '900px' }}>
       <div className="guide-doc" id="guide-doc-content">
         {/* 문서 헤더 */}
-        <div className="guide-doc-header">
+        <div className="guide-doc-header" style={{ justifyContent: 'center' }}>
           <div className="hospital-logo-area">
-            <img src="/knuh-logo.svg" alt="강원대학교병원" className="hospital-full-logo" />
+            <img src="/knuh-logo.svg" alt="병원" className="hospital-full-logo" />
           </div>
+        </div>
+        <div className="guide-doc-type-row">
           <div className="guide-doc-type">검사 안내문</div>
         </div>
 
@@ -116,24 +130,6 @@ function PublicGuide() {
               </div>
             )}
 
-            <div className="guide-map-container">
-              <div style={{ textAlign: 'center', marginBottom: '12px' }}>
-                <span className="guide-map-title">{exam.guideInfo.floor} 안내도</span>
-              </div>
-              <div className="guide-map-flow">
-                {exam.guideInfo.mapNodes.map((node, i) => (
-                  <span key={i} style={{ display: 'contents' }}>
-                    <div className={`guide-map-node ${node.type}`}>
-                      {node.label}
-                    </div>
-                    {i < exam.guideInfo.mapNodes.length - 1 && (
-                      <span className="guide-map-arrow">- - - →</span>
-                    )}
-                  </span>
-                ))}
-              </div>
-            </div>
-
             <div className="guide-direction">
               <span className="guide-direction-icon">🚶</span>
               <strong>이동 안내: </strong>{exam.guideInfo.direction}
@@ -144,7 +140,7 @@ function PublicGuide() {
         {/* 문서 하단 */}
         <div className="guide-doc-footer">
           <div className="guide-footer-left">
-            <span>📞 문의: 원무과 (내선 1번) / {settings.phone}</span>
+            <span>📞 문의: 원무과 (내선 1번)</span>
           </div>
         </div>
       </div>

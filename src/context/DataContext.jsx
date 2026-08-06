@@ -45,6 +45,8 @@ export function DataProvider({ children }) {
   useEffect(() => {
     if (hospitalInfo) {
       loadData();
+    } else {
+      setData(prev => ({ ...prev, isLoading: false }));
     }
   }, [hospitalInfo]);
 
