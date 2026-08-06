@@ -58,7 +58,7 @@ function PatientDetail() {
           <div className="patient-name-large">
             {basicInfo.name}
             <span className="patient-gender-age">
-              <span className="patient-gender-badge">{basicInfo.gender}</span>
+              <span className={`patient-gender-badge ${basicInfo.gender === '여' ? 'female' : ''}`}>{basicInfo.gender}</span>
               {basicInfo.age}세
             </span>
           </div>

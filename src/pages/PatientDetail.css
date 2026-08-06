@@ -91,6 +91,11 @@
   font-size: 12px;
 }
 
+.patient-gender-badge.female {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
 .detail-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
