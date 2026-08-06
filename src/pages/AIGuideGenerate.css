@@ -12,9 +12,24 @@
 
 .guide-doc-header {
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 12px;
   padding-bottom: 20px;
   border-bottom: 2px solid #1e293b;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hospital-name-text {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a3a6b;
+  margin-left: 12px;
+}
+
+.guide-doc-type-row {
+  text-align: center;
+  margin-bottom: 16px;
 }
 
 .hospital-logo-area {

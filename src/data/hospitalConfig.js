@@ -16,7 +16,7 @@ const hospitalConfig = {
     s3Bucket: 'hospital-demo-data-6zo',
     mapsFolder: 'maps',
     phone: '02-2030-5000',
-    logo: '/knuh-logo.svg',
+    logo: '/konkuk-logo.svg',
   },
   // 향후 확장:
   // 'EMP2024003': {
